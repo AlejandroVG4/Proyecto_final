@@ -1,4 +1,4 @@
-from .models import CustomUser
+from .models import Usuarios
 from .serializers import UserSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -8,7 +8,7 @@ from rest_framework import generics
 
 # Create your views here.
 class RegisterView(generics.CreateAPIView):
-    queryset = CustomUser.objects.all()
+    queryset = Usuarios.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
