@@ -5,8 +5,10 @@ from gestion_plagas.settings import env
 # Variables para acceder al blob
 # Nombre de la cuenta de azure
 account_name = env("AZURE_BLOB_NAME")
+
 # Clave para autenticar solicitudes
 account_key = env("AZURE_BLOB_KEY")
+
 # Nombre del contenedor
 container_name = 'plantstorage'
 
@@ -24,7 +26,7 @@ def get_sas_url():
         permissions = ContainerSasPermissions(write=True, create=True, add=True)
         # tiempo en el que expira el token
         expiry_time = datetime.utcnow() + timedelta(minutes=10)
-
+        print(account_name)
         sas_token = generate_container_sas(
             # La cuenta usada para generar el SAS
             account_name=account_name, 
