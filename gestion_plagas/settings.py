@@ -12,6 +12,11 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import environ
+
+env = environ.Env()
+environ.Env.read_env()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -91,7 +96,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'gestion_plagas',
+        # TODO cambiar usuario en produccion
         'USER': 'postgres',
+        # TODO cambiar contraseña y variables de entorno
+        # TODO Gestor de contraseñas bitwarden
         'PASSWORD': 'root',
         'HOST': 'localhost',
         'PORT': ''
@@ -163,3 +171,4 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': False,
 }
+
