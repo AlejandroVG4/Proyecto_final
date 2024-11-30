@@ -51,7 +51,7 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         serializer.save()  # Guarda el usuario actualizado.
 
-    # TODO SOFT-DELETE USER
+    # TODO REVISAR SOFT-DELETE USER
     def delete(self, request, *args, **kwargs):
         user = request.user  # Obtiene el usuario autenticado.
         print(user)
