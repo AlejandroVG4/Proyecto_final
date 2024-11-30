@@ -73,3 +73,12 @@ class UserManager(BaseUserManager):
             raise ValueError('el atributo is_superuser debe ser True')
         
         return self.create_user(email, password, **extra_fields)
+
+    def get_queryset(self):
+        # Excluye los usuarios marcados como soft-deleted
+        return super().get_queryset().filter(is_deleted=False)
+
+    def all_with_deleted(self):
+        return super().get_queryset()
+
+    

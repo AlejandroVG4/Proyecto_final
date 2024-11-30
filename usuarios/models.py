@@ -28,6 +28,8 @@ class Usuarios(AbstractBaseUser):
     email = models.EmailField(max_length=100, unique=True, error_messages={'unique' : 'Este Correo electronico ya esta registrado'})
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    # Campo para soft delete
+    is_deleted = models.BooleanField(default=False)
     # TODO REVISAR ESTE CAMPO PARA VERIFICACION DE USUARIO DE A TRAVES DEL CORREO
     # is_verified = models.BooleanField(default=False)
 
@@ -41,3 +43,13 @@ class Usuarios(AbstractBaseUser):
     # Al imprimir el objecto se mostrara el valor de name en lugar de la representacion predeterminada del objeto
     def __str__(self) :
         return self.name
+
+    # Sobre escribir el metodo delete para soft delete
+    def delete(self, using=None, keep_parents=False):
+        self.is_deleted = True
+        self.save(using=using)
+
+    # Metodo para restaurar un usuario
+    def restore(self):
+        self.is_deleted = False
+        self.save()
