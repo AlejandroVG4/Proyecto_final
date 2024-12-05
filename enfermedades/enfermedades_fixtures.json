@@ -1,0 +1,21 @@
+[
+    {
+        "model": "enfermedades.enfermedad",
+        "pk": 1,
+        "fields": {
+            "nombre": "Rust",
+            "descripcion": "Enfermedad causada por hongos que afecta diversas plantas.",
+            "tratamientos": [1, 2, 3, 4, 5]  
+        }
+    },
+
+    {
+        "model": "enfermedades.enfermedad",
+        "pk": 2,
+        "fields": {
+            "nombre": "Powdery Mildew",
+            "descripcion": "Enfermedad causada por hongos que produce polvo blanco en las plantas.",
+            "tratamientos": [6, 7, 8, 9, 10]  
+        }
+    }
+]
