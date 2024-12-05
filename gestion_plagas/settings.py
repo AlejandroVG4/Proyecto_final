@@ -102,7 +102,7 @@ DATABASES = {
         # TODO Gestor de contraseñas bitwarden
         'PASSWORD': env('DB_PASSWORD'),
         'HOST': env('DB_HOST'),
-         'PORT': env('DB_PORT', default='5432'),
+        'PORT': env('DB_PORT', default='5432'),
     }
 }
 
