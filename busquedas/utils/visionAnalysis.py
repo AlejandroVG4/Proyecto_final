@@ -10,8 +10,6 @@ model_name = env("COMP_VISION_MODELNAME")
 # creamos la url para del endpoint con la ia
 custom_model_endpoint = f'{endpoint}/computervision/imageanalysis:analyze?model-name={model_name}&api-version=2023-04-01-preview'
 
-# Imagen de prueba
-#prueba_img = "https://illnessstorage2.blob.core.windows.net/plantstorage/powdery_mildew.jpg"
 
 def analyze_image(imgUrl):
     print("En funcion analisis")
@@ -38,14 +36,26 @@ def analyze_image(imgUrl):
             #print("Metadata:", response_data.["metaData"])
 
             custom_model_result = response_data['customModelResult']
-            print(custom_model_result)
 
             if "tagsResult" in custom_model_result : 
-                print("Condicional tagsResult")
                 tags_result = custom_model_result["tagsResult"]
 
-                #TODO Aplicar Logica para devolver el valor mas cercano a 1
-                return tags_result
+                #Funcion que encuentra el mayor valor de los resultados
+                closest_to_one = max(tags_result["values"], key = lambda x: x["confidence"])
+
+                # Extraemos nombre de la enfermedad con el mayor valor
+                illness_name = closest_to_one["name"]
+
+                 # TODO Aplicar logica si la imagen esta healthy, no se debe devolver un tratamiento
+                # diccionario de respuesta
+                result = {
+                    "illness" : illness_name,
+                    "img" : imgUrl,
+                    # TODO obtener el tratamiento de la base de datos
+                    "treatment" : None,
+                }
+                
+                return result
             else:
                 print("Sin Resultados")
 
@@ -56,3 +66,4 @@ def analyze_image(imgUrl):
     except Exception as e:
         print(e)
         return None
+
