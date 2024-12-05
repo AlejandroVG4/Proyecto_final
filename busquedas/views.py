@@ -4,6 +4,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
+from .models import Busqueda
+from .serializers import BusquedaSerializer
+from rest_framework import generics
 
 
 # Create your views here.
@@ -21,5 +24,13 @@ class GenerateSasUrlView(APIView):
            
         except Exception as e:
             print(e)
+            
 
+class BusquedaListCreateView(generics.ListCreateAPIView):
+    queryset = Busqueda.objects.all()
+    serializer_class = BusquedaSerializer
+
+class BusquedaDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Busqueda.objects.all()
+    serializer_class = BusquedaSerializer
         
