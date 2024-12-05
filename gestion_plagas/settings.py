@@ -94,15 +94,15 @@ WSGI_APPLICATION = 'gestion_plagas.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'gestion_plagas',
+        'ENGINE': env('DB_ENGINE'),
+        'NAME': env('DB_NAME'),
         # TODO cambiar usuario en produccion
-        'USER': 'postgres',
+        'USER': env('DB_USER'),
         # TODO cambiar contraseña y variables de entorno
         # TODO Gestor de contraseñas bitwarden
-        'PASSWORD': 'root',
-        'HOST': 'localhost',
-        'PORT': ''
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': env('DB_HOST'),
+         'PORT': env('DB_PORT', default='5432'),
     }
 }
 
