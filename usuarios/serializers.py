@@ -26,3 +26,14 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         usuario = Usuarios.objects.create_user(**validated_data)
         return usuario
+
+class ProfileOutputSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Usuarios
+        fields = ['name', 'email']
+        
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model: Usuarios
+        fields = ['name', 'email', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
