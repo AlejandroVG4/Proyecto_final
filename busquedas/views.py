@@ -41,5 +41,5 @@ class AnalyzeImageView(APIView):
         if "error" in result:
             return Response(result, status=status.HTTP_400_BAD_REQUEST)
         
-        return Response({"tags": result}, status=status.HTTP_200_OK)
+        return Response(result, status=status.HTTP_200_OK)
 

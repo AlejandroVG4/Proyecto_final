@@ -11,9 +11,9 @@ model_name = env("COMP_VISION_MODELNAME")
 custom_model_endpoint = f'{endpoint}/computervision/imageanalysis:analyze?model-name={model_name}&api-version=2023-04-01-preview'
 
 # Imagen de prueba
-prueba_img = "https://illnessstorage2.blob.core.windows.net/plantstorage/powdery_mildew.jpg"
+#prueba_img = "https://illnessstorage2.blob.core.windows.net/plantstorage/powdery_mildew.jpg"
 
-def analyze_image(imgUrl=prueba_img):
+def analyze_image(imgUrl):
     print("En funcion analisis")
     # encabezados
     headers = {
