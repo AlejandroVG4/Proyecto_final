@@ -34,6 +34,6 @@ class ProfileOutputSerializer(serializers.ModelSerializer):
         
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
-        model: Usuarios
+        model = Usuarios
         fields = ['name', 'email', 'password']
         extra_kwargs = {'password': {'write_only': True}}

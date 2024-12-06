@@ -36,13 +36,13 @@ class ProfileView(generics.RetrieveAPIView):
     
     
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Usuarios.objects.all()  # Recupera todos los usuarios.
     permission_classes = [IsAuthenticated]  # Solo accesible para usuarios autenticados.
+    queryset = Usuarios.objects.all()  # Recupera todos los usuarios.
     serializer_class = UserUpdateSerializer  # Usa el serializador UserUpdateSerializer para PUT y PATCH.
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.get('partial', False)  # Detecta si es un PATCH (parcial).
-        instance = self.get_object()  # Obtiene el usuario a actualizar.
+        instance = request.user # Obtiene el usuario a actualizar.
         serializer = self.get_serializer(instance, data=request.data, partial=partial)  # Valida y serializa los datos.
         serializer.is_valid(raise_exception=True)  # Valida los datos del serializador.
         self.perform_update(serializer)  # Guarda los cambios en la base de datos.
@@ -57,16 +57,3 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
         print(user)
         user.delete()  # Elimina el usuario de la base de datos.
         return Response({"message": "Usuario eliminado exitosamente."}, status=status.HTTP_204_NO_CONTENT)  # Mensaje de éxito.
-
-# TODO CUIDADO ESTO SE TIENE QUE REVISAR SI SE VA PERMITIR RESTAURAR UN USUARIO ELIMINADO
-class UserRestoreView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, email):
-        try:
-            user = Usuarios.objects.all_with_deleted().filter(email=email, is_deleted=True).first()
-            print(user)
-            user.restore()
-            return Response({"mensaje": f"usuario {user.email} restaurado"}, status=status.HTTP_200_OK)
-        except Usuarios.DoesNotExist:
-            return Response({"detail": "Usuario no encontrado o no soft-deleted."}, status=status.HTTP_404_NOT_FOUND)
