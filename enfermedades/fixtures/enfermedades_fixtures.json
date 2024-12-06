@@ -11,7 +11,7 @@
         "model": "enfermedades.enfermedad",
         "pk": 2,
         "fields": {
-            "nombre": "powdery Mildew"
+            "nombre": "powdery"
         }
     }
 ]
