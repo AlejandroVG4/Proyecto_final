@@ -46,16 +46,7 @@ def analyze_image(imgUrl):
                 # Extraemos nombre de la enfermedad con el mayor valor
                 illness_name = closest_to_one["name"]
 
-                 # TODO Aplicar logica si la imagen esta healthy, no se debe devolver un tratamiento
-                # diccionario de respuesta
-                result = {
-                    "illness" : illness_name,
-                    "img" : imgUrl,
-                    # TODO obtener el tratamiento de la base de datos
-                    "treatment" : None,
-                }
-                
-                return result
+                return illness_name
             else:
                 print("Sin Resultados")
 

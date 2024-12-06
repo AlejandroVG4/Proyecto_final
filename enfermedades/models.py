@@ -14,5 +14,5 @@ class Tratamiento(models.Model):
     fuente = models.URLField(default="urlexample.com")  # Nueva columna para almacenar la fuente (URL)
     
     def __str__(self):
-        return self.nombre
+        return self.descripcion
     
