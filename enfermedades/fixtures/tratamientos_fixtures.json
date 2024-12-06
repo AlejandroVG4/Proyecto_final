@@ -1,0 +1,38 @@
+[
+    {
+        "model": "enfermedades.tratamiento",
+        "pk": 1,
+        "fields": {
+            "descripcion": "Para hacer un fungicida con bicarbonato y aceite de oliva, mezcla 2 cucharaditas de aceite y 1 cucharadita de bicarbonato en 1 litro de agua. Aplica en las hojas infectadas y repite 3 semanas después, probando antes en una pequeña parte de la planta",
+            "enfermedad" : 1,
+            "fuente": "https://www.purplant.es/blog/eliminar-roya-ajo/?srsltid=AfmBOoqLHEPkVEXSETExafQM942wOpf2gk1YXJGmEPI2XUXEdM_56xNz"
+        }
+    },
+    {
+        "model": "enfermedades.tratamiento",
+        "pk": 2,
+        "fields": {
+            "descripcion": "El purín de ortiga fortalece las plantas y las protege de plagas como la roya.",
+            "enfermedad" : 1,
+            "fuente": "https://canjuanito.com/enfermedades-plantas/roya/?srsltid=AfmBOooVVfJ0Tu4Yax0L13h_nQW254mJ8KshG0Ql-EdVGXu9QIqBXRKr"
+        }
+    },
+    {
+        "model": "enfermedades.tratamiento",
+        "pk": 3,
+        "fields": {
+            "descripcion": "El extracto de ajo es un remedio casero repelente de mildiu, hongos e insectos. Infusiona 100 gramos de ajo en 1 litro de agua reposada por 24 horas. Pulveriza las plantas afectadas o úsalo como tratamiento preventivo.",
+            "enfermedad" : 2,
+            "fuente": "https://www.purplant.es/blog/combatir-mildiu-plantas/#:~:text=Debemos%20infusionar%20100%20gramos%20de,afectadas%2C%20tambi%C3%A9n%20como%20tratamiento%20preventivo."
+        }
+    },
+    {
+        "model": "enfermedades.tratamiento",
+        "pk": 4,
+        "fields": {
+            "descripcion": "Las decocciones de cola de caballo (20 g/litro de agua) o manzanilla (50 g/litro diluido en 9 litros) son útiles contra el mildiu. Pulveriza la planta afectada con el extracto a primera hora de la mañana o por la noche, evitando las horas de más calor",
+            "enfermedad" : 2,
+            "fuente": "https://www.purplant.es/blog/combatir-mildiu-plantas/#:~:text=Debemos%20infusionar%20100%20gramos%20de,afectadas%2C%20tambi%C3%A9n%20como%20tratamiento%20preventivo."
+        }
+    }
+]

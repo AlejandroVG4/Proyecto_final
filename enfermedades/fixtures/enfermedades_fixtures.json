@@ -1,0 +1,17 @@
+[
+    {
+        "model": "enfermedades.enfermedad",
+        "pk": 1,
+        "fields": {
+            "nombre": "rust"
+        }
+    },
+
+    {
+        "model": "enfermedades.enfermedad",
+        "pk": 2,
+        "fields": {
+            "nombre": "powdery Mildew"
+        }
+    }
+]
