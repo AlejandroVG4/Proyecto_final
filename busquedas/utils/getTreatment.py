@@ -14,7 +14,6 @@ def get_treatment(illness):
         # Filtrar la enfermedad
         illness_bd = Enfermedad.objects.get(nombre=illness)
 
-        print(illness_bd)
         # Filtrar los tratamientos de esa enfermedad
         treatments = Tratamiento.objects.filter(enfermedad_id=illness_bd.pk)
 
@@ -24,7 +23,10 @@ def get_treatment(illness):
         # Asignar uno al azar
         tratamiento = random.choice(serializer.data)
 
-        return tratamiento
+        #Diccionario con pk y diccionario de tratamiento
+        diccionario_chill = {"illness_pk" : illness_bd.pk , "tratamiento" : tratamiento}
+
+        return diccionario_chill
     except Enfermedad.DoesNotExist:
         # Manejar error cuando la enfermedad que entregue la ia no exista
         return {"error": f"Tratamientos para esta enfermedad: {illness} no disponibles "}
