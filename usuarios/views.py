@@ -1,5 +1,6 @@
 from .models import Usuarios
 from .serializers import UserSerializer, ProfileOutputSerializer, UserUpdateSerializer
+from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.exceptions import AuthenticationFailed
@@ -43,6 +44,11 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     def update(self, request, *args, **kwargs):
         partial = kwargs.get('partial', False)  # Detecta si es un PATCH (parcial).
         instance = request.user # Obtiene el usuario a actualizar.
+
+        # Encripta la contraseña
+        if "password" in request.data:
+            request.data["password"] = make_password(request.data["password"])
+
         serializer = self.get_serializer(instance, data=request.data, partial=partial)  # Valida y serializa los datos.
         serializer.is_valid(raise_exception=True)  # Valida los datos del serializador.
         self.perform_update(serializer)  # Guarda los cambios en la base de datos.
@@ -51,7 +57,7 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         serializer.save()  # Guarda el usuario actualizado.
 
-    # TODO REVISAR SOFT-DELETE USER
+    # Llama el metodo delete del modelo
     def delete(self, request, *args, **kwargs):
         user = request.user  # Obtiene el usuario autenticado.
         print(user)
