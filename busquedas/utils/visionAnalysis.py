@@ -36,7 +36,8 @@ def analyze_image(imgUrl):
             #print("Metadata:", response_data.["metaData"])
 
             custom_model_result = response_data['customModelResult']
-
+            print("custom_model_resul", custom_model_result)
+            
             if "tagsResult" in custom_model_result : 
                 tags_result = custom_model_result["tagsResult"]
 

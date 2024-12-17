@@ -65,6 +65,7 @@ class AnalyzeImageView(APIView):
         treatment = treatment_dict["tratamiento"]
         print(treatment)
 
+        #TODO OBTENER LA UBICACION (UBICACION DE PRUEBA)
         ubicacion_prueba = Ubicacion.objects.get(id=1)
 
         print("Guradando Busqueda")
