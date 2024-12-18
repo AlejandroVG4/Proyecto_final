@@ -91,9 +91,13 @@ class AnalyzeImageView(APIView):
         return Response(result, status=status.HTTP_200_OK)
 
 
-class BusquedaListCreateView(generics.ListCreateAPIView):
+class BusquedaListView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Busqueda.objects.all()
     serializer_class = BusquedaSerializer
+
+    def get_object(self):
+        return self.request.user
 
 class BusquedaDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Busqueda.objects.all()
