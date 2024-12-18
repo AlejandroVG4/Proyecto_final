@@ -11,7 +11,7 @@ def get_treatment(illness):
              # Cuando la planta este sana no entregar tratamiento
             return {"mensaje" : "La planta está sana y no requiere tratamiento"}
         
-        # Filtrar la enfermedad
+        # Obtiene la enfermedad
         illness_bd = Enfermedad.objects.get(nombre=illness)
 
         # Filtrar los tratamientos de esa enfermedad
