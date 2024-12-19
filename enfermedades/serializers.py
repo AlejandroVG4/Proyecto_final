@@ -10,4 +10,4 @@ class EnfermedadSerializer(serializers.ModelSerializer):
     tratamientos = TratamientoSerializer(many = True, read_only=True)
     class Meta:
         model = Enfermedad
-        fields = ["id", "nombre", "tratamiento"]
+        fields = ["id", "nombre", "tratamientos"]

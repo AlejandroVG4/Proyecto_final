@@ -41,4 +41,4 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 class UbicacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ubicacion
-        fields = ["nombre", "latitud", "logitud"]
+        fields = ["id", "nombre", "latitud", "longitud"]

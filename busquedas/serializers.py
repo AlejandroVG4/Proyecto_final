@@ -31,10 +31,10 @@ class BusquedaSerializer(ModelSerializer):
             'enfermedad',
             'ubicacion',
             'imagen',
-            'usuario',
             'enfermedad_id',
             'ubicacion_id',
-            'imagen_id'
+            'imagen_id',
+            'usuario_id'
         ]
 
 

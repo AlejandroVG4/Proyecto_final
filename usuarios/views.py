@@ -17,7 +17,7 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
-# Vista Para Logearse  
+# Vista Para Logearse
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         try:
@@ -30,7 +30,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 class ProfileView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ProfileOutputSerializer
-    
     # Metodo que define el usuario que se debe devolver
     def get_object(self):
         return self.request.user
@@ -47,14 +46,14 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
         # Encripta la contraseña
         if "password" in request.data:
             request.data["password"] = make_password(request.data["password"])
-        
+
         invalid_fields = [field for field in request.data.keys() if field not in ['name', 'email', 'password']]
         if invalid_fields:
             if len(invalid_fields) == 1:
                 error_message = f"El campo {invalid_fields[0]} no es válido."
             else:
                 error_message = f"Los campos {', '.join(invalid_fields)} no son válidos."
-            
+
             return Response({"error": error_message}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.get_serializer(instance, data=request.data, partial=partial)  # Valida y serializa los datos.

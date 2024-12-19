@@ -12,7 +12,6 @@ custom_model_endpoint = f'{endpoint}/computervision/imageanalysis:analyze?model-
 
 
 def analyze_image(imgUrl):
-    print("En funcion analisis")
     # encabezados
     headers = {
         "Content-Type":"application/json",
@@ -30,15 +29,13 @@ def analyze_image(imgUrl):
         #verificar si la solicitud fue exitosa
         if response.status_code == 200:
             response_data = response.json()
-            
 
             #print("ModelVersion", response_data["modelVersion"])
             #print("Metadata:", response_data.["metaData"])
 
             custom_model_result = response_data['customModelResult']
-            print("custom_model_resul", custom_model_result)
-            
-            if "tagsResult" in custom_model_result : 
+
+            if "tagsResult" in custom_model_result :
                 tags_result = custom_model_result["tagsResult"]
 
                 #Funcion que encuentra el mayor valor de los resultados
@@ -51,7 +48,7 @@ def analyze_image(imgUrl):
             else:
                 print("Sin Resultados")
 
-            return 
+            return
         else:
             print(f"Error {response.status_code} - {response.text}")
             return None

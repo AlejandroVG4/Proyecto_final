@@ -4,13 +4,11 @@ import random
 
 def get_treatment(illness):
     print("En funcion get_treatment")
-    
     try:
         # Verificar si el resultado es healthy
         if illness == "healthy":
              # Cuando la planta este sana no entregar tratamiento
             return {"mensaje" : "La planta está sana y no requiere tratamiento"}
-        
         # Obtiene la enfermedad
         illness_bd = Enfermedad.objects.get(nombre=illness)
 
@@ -30,7 +28,3 @@ def get_treatment(illness):
     except Enfermedad.DoesNotExist:
         # Manejar error cuando la enfermedad que entregue la ia no exista
         return {"error": f"Tratamientos para esta enfermedad: {illness} no disponibles "}
-
-
-    
-    

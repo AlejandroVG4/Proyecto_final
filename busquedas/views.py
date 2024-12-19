@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .models import Busqueda, Imagen
 from enfermedades.models import Enfermedad
-from usuarios.models import Ubicacion
+from usuarios.models import Ubicacion, Usuarios
 from .serializers import BusquedaSerializer
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 
@@ -34,59 +34,56 @@ class AnalyzeImageView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        print("En peticion post")
-
-        # Obtener la url de la imagen de la request
+        # Extraer la url de la imagen de la request
         img_url = request.data.get('img_url')
-        print("url de la imagen", img_url)
-
-        # Obtener el Usuario logeado de la request
-        user = request.user
-        print("usuario de la busqueda", user)
 
         if not img_url:
-            return Response({"error": "Imagen Requerida"}, status=status.HTTP_400_BAD_REQUEST)
-
-        illness = analyze_image(img_url)
-        treatment_dict = get_treatment(illness)
+            return Response(
+                {"error": "Imagen Requerida"},
+                status=status.HTTP_400_BAD_REQUEST
+                )
 
         # Guardamos la url de la imagen en la base de datos
-        # TODO se va a dejar subir una imagen varias veces?
         img = Imagen.objects.create(url=img_url)
 
+        # Llama la funcion para obtener el nombre de la enfermedad
+        illness = analyze_image(img_url)
 
-        # Obtener la pk de la enfermedad
-        illness_instancia = Enfermedad.objects.get(id=treatment_dict["illness_pk"])
-        print(illness_instancia)
+        # Instancias de los campos del modelo búsquedas
+        enfermedad = Enfermedad.objects.get(nombre=illness)
+        usuario = Usuarios.objects.get(id=request.user.id)
+        ubicacion = Ubicacion.objects.get(id=1)
 
-        # Obtener el tratamiento y fuente para devolver al front
-        treatment = treatment_dict["tratamiento"]
-        print(treatment)
+        if not(enfermedad and usuario and ubicacion):
+            return Response(
+                {"error" : "Datos de búsqueda incompletos"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        #TODO OBTENER LA UBICACION (UBICACION DE PRUEBA)
-        ubicacion_prueba = Ubicacion.objects.get(id=1)
-
-        print("Guradando Busqueda")
-        # Crear la busqueda
-        busqueda = Busqueda.objects.create(
-            enfermedad = illness_instancia,
-            ubicacion = ubicacion_prueba,
-            imagen = img,
-            usuario = user
-        )
-
-
-        # Aqui construimos el diccionario para entregar los resultados al front
-        result = {
-            "illness" : illness,
-            "url" : img_url,
-            "treatment" : treatment
+        busqueda_data = {
+            "enfermedad_id" : enfermedad.id,
+            "usuario_id" : usuario.id,
+            "imagen_id" : img.id,
+            "ubicación_id" : ubicacion.id,
+            "enfermedad" : enfermedad,
+            "ubicación" : ubicacion,
+            "imagen" : img
         }
 
-        if "error" in result:
-            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        serializer = BusquedaSerializer(data=busqueda_data)
+        if serializer.is_valid():
+            serializer.save()
+            busqueda = serializer.data
+            return Response(
+                {
+                    "mensaje" : "Búsqueda creada con éxito",
+                    "búsqueda" : busqueda
+                },
+                status = status.HTTP_200_OK
+            )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(result, status=status.HTTP_200_OK)
 
 # Vista que devuelve la lista de busquedas por usuario
 class BusquedaListView(ListCreateAPIView):
