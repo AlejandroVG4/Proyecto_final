@@ -10,6 +10,7 @@ from enfermedades.models import Enfermedad
 from usuarios.models import Ubicacion, Usuarios
 from .serializers import BusquedaSerializer
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.pagination import LimitOffsetPagination
 
 
 # Create your views here.
@@ -90,12 +91,19 @@ class AnalyzeImageView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+# Paginacion
+class BusquedaPagination(LimitOffsetPagination):
+    default_limit = 5 # Limite predeterminado
+    max_limit = 20 # Limite maximo permitido
+    
 # Vista que devuelve la lista de busquedas por usuario
+# URL peticion con paginacion: ?limit=3
+
 class BusquedaListView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Busqueda.objects.all()
     serializer_class = BusquedaSerializer
+    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         user = self.request.user
