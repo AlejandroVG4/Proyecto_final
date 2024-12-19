@@ -1,0 +1,11 @@
+[
+    {
+        "model": "usuarios.ubicacion",
+        "pk" : 1,
+        "fields" : {
+            "nombre" : "Central Park, Nueva York",
+            "latitud" : "40.785091",
+            "longitud" : "-73.96828"
+        }
+    }
+]
