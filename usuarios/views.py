@@ -17,7 +17,7 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
-# Vista Para Logearse
+# Vista Para Logearse  
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         try:
@@ -30,10 +30,10 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 class ProfileView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ProfileOutputSerializer
-
+    
     # Metodo que define el usuario que se debe devolver
-    def get_queryset(self):
-        user = self.request.user
+    def get_object(self):
+        return self.request.user
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]  # Solo accesible para usuarios autenticados.
