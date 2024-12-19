@@ -1,4 +1,3 @@
-from django.http import JsonResponse
 from .utils.getSasUrl import get_sas_url
 from .utils.visionAnalysis import analyze_image
 from .utils.getTreatment import get_treatment
@@ -6,12 +5,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-
 from .models import Busqueda, Imagen
 from enfermedades.models import Enfermedad
 from usuarios.models import Ubicacion
 from .serializers import BusquedaSerializer
-from rest_framework import generics
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 
 
 # Create your views here.
@@ -29,7 +27,7 @@ class GenerateSasUrlView(APIView):
            
         except Exception as e:
             print(e)
-            
+
 # Imagen de prueba
 
 class AnalyzeImageView(APIView):
@@ -57,7 +55,7 @@ class AnalyzeImageView(APIView):
         img = Imagen.objects.create(url=img_url)
 
 
-        # Obtener la pk de la enfermedad 
+        # Obtener la pk de la enfermedad
         illness_instancia = Enfermedad.objects.get(id=treatment_dict["illness_pk"])
         print(illness_instancia)
 
@@ -69,7 +67,7 @@ class AnalyzeImageView(APIView):
         ubicacion_prueba = Ubicacion.objects.get(id=1)
 
         print("Guradando Busqueda")
-        # Crear la busqueda 
+        # Crear la busqueda
         busqueda = Busqueda.objects.create(
             enfermedad = illness_instancia,
             ubicacion = ubicacion_prueba,
@@ -87,14 +85,21 @@ class AnalyzeImageView(APIView):
 
         if "error" in result:
             return Response(result, status=status.HTTP_400_BAD_REQUEST)
-        
+
         return Response(result, status=status.HTTP_200_OK)
 
-
-class BusquedaListCreateView(generics.ListCreateAPIView):
+# Vista que devuelve la lista de busquedas por usuario
+class BusquedaListView(ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Busqueda.objects.all()
     serializer_class = BusquedaSerializer
 
-class BusquedaDetailView(generics.RetrieveUpdateDestroyAPIView):
+    def get_queryset(self):
+        user = self.request.user
+        return Busqueda.objects.filter(usuario=user)
+
+class BusquedaDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Busqueda.objects.all()
     serializer_class = BusquedaSerializer
+
+

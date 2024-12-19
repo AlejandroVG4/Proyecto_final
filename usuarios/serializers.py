@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from .models import Usuarios
+from .models import Usuarios, Ubicacion
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -31,9 +31,14 @@ class ProfileOutputSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuarios
         fields = ['name', 'email']
-        
+
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuarios
         fields = ['name', 'email', 'password']
         extra_kwargs = {'password': {'write_only': True}}
+
+class UbicacionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ubicacion
+        fields = ["nombre", "latitud", "logitud"]
