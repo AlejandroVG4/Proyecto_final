@@ -66,7 +66,7 @@ class AnalyzeImageView(APIView):
             "imagen_id" : img.id,
             "ubicacion_id" : ubicacion.id,
             "enfermedad" : enfermedad,
-            "ubicación" : ubicacion,
+            "ubicacion" : ubicacion,
             "imagen" : img
         }
 
