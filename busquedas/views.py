@@ -52,7 +52,13 @@ class AnalyzeImageView(APIView):
         # Instancias de los campos del modelo búsquedas
         enfermedad = Enfermedad.objects.get(nombre=illness)
         usuario = Usuarios.objects.get(id=request.user.id)
-        ubicacion = Ubicacion.objects.get(id=1)
+        
+        # Revisar si viene ubicacion el la request
+        ubicacion_data = request.data.get('ubicacion')
+        
+        if not ubicacion_data:
+            ubicacion = Ubicacion.objects.filter(nombre="Ubicación no disponible").first()
+             
 
         if not(enfermedad and usuario and ubicacion):
             return Response(
