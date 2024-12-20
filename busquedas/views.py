@@ -1,4 +1,3 @@
-from django.http import JsonResponse
 from .utils.getSasUrl import get_sas_url
 from .utils.visionAnalysis import analyze_image
 from .utils.getTreatment import get_treatment
@@ -6,7 +5,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-
+from .models import Busqueda, Imagen
+from enfermedades.models import Enfermedad
+from usuarios.models import Ubicacion, Usuarios
+from .serializers import BusquedaSerializer
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.pagination import LimitOffsetPagination
 
 
 # Create your views here.
@@ -31,24 +35,82 @@ class AnalyzeImageView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        print("En peticion post")
+        # Extraer la url de la imagen de la request
         img_url = request.data.get('img_url')
 
         if not img_url:
-            return Response({"error": "Imagen Requerida"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Imagen Requerida"},
+                status=status.HTTP_400_BAD_REQUEST
+                )
 
+        # Guardamos la url de la imagen en la base de datos
+        img = Imagen.objects.create(url=img_url)
+
+        # Llama la funcion para obtener el nombre de la enfermedad
         illness = analyze_image(img_url)
-        treatment = get_treatment(illness)
 
-        # Aqui construimos el diccionario para entregar los resultados al front
-        result = {
-            "illness" : illness,
-            "url" : img_url,
-            "treatment" : treatment
+        # Instancias de los campos del modelo búsquedas
+        enfermedad = Enfermedad.objects.get(nombre=illness)
+        usuario = Usuarios.objects.get(id=request.user.id)
+        
+        # Revisar si viene ubicacion el la request
+        ubicacion_data = request.data.get('ubicacion')
+        
+        if not ubicacion_data:
+            ubicacion = Ubicacion.objects.filter(nombre="Ubicación no disponible").first()
+             
+
+        if not(enfermedad and usuario and ubicacion):
+            return Response(
+                {"error" : "Datos de búsqueda incompletos"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        busqueda_data = {
+            "enfermedad_id" : enfermedad.id,
+            "usuario_id" : usuario.id,
+            "imagen_id" : img.id,
+            "ubicacion_id" : ubicacion.id,
+            "enfermedad" : enfermedad,
+            "ubicacion" : ubicacion,
+            "imagen" : img
         }
 
-        if "error" in result:
-            return Response(result, status=status.HTTP_400_BAD_REQUEST)
-        
-        return Response(result, status=status.HTTP_200_OK)
+        serializer = BusquedaSerializer(data=busqueda_data)
+        if serializer.is_valid():
+            serializer.save()
+            busqueda = serializer.data
+            return Response(
+                {
+                    "mensaje" : "Búsqueda creada con éxito",
+                    "búsqueda" : busqueda
+                },
+                status = status.HTTP_200_OK
+            )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# Paginacion
+class BusquedaPagination(LimitOffsetPagination):
+    default_limit = 5 # Limite predeterminado
+    max_limit = 20 # Limite maximo permitido
+    
+# Vista que devuelve la lista de busquedas por usuario
+# URL peticion con paginacion: ?limit=3
+
+class BusquedaListView(ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Busqueda.objects.all()
+    serializer_class = BusquedaSerializer
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        user = self.request.user
+        return Busqueda.objects.filter(usuario=user)
+
+class BusquedaDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Busqueda.objects.all()
+    serializer_class = BusquedaSerializer
+
 

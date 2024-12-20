@@ -1,0 +1,11 @@
+[
+    {
+        "model": "usuarios.ubicacion",
+        "pk" : 1,
+        "fields" : {
+            "nombre" : "Ubicación no disponible",
+            "latitud" : "0.0",
+            "longitud" : "0.0"
+        }
+    }
+]
