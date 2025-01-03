@@ -25,7 +25,6 @@ class GenerateSasUrlView(APIView):
         try:
             url = get_sas_url()
             return Response({"url" : url}, status=status.HTTP_200_OK)
-           
         except Exception as e:
             print(e)
 
@@ -50,18 +49,21 @@ class AnalyzeImageView(APIView):
         # Llama la funcion para obtener el nombre de la enfermedad
         illness = analyze_image(img_url)
 
+        print("Pase illness Vista", illness)
         # Instancias de los campos del modelo búsquedas
         enfermedad = Enfermedad.objects.get(nombre=illness)
         usuario = Usuarios.objects.get(id=request.user.id)
-        
+
         # Revisar si viene ubicacion el la request
         ubicacion_data = request.data.get('ubicacion')
-        
+
+        # Si no tiene ubicacion asigna una por defecto
         if not ubicacion_data:
             ubicacion = Ubicacion.objects.filter(nombre="Ubicación no disponible").first()
-             
 
+        # Si falta algun dato de la busqueda
         if not(enfermedad and usuario and ubicacion):
+            print(illness, usuario, ubicacion)
             return Response(
                 {"error" : "Datos de búsqueda incompletos"},
                 status=status.HTTP_400_BAD_REQUEST
@@ -95,7 +97,7 @@ class AnalyzeImageView(APIView):
 class BusquedaPagination(LimitOffsetPagination):
     default_limit = 5 # Limite predeterminado
     max_limit = 20 # Limite maximo permitido
-    
+
 # Vista que devuelve la lista de busquedas por usuario
 # URL peticion con paginacion: ?limit=3
 
@@ -103,7 +105,8 @@ class BusquedaListView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Busqueda.objects.all()
     serializer_class = BusquedaSerializer
-    pagination_class = LimitOffsetPagination
+    # Clase que define como manejar la pagination
+    pagination_class = BusquedaPagination
 
     def get_queryset(self):
         user = self.request.user
