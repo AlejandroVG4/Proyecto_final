@@ -11,18 +11,9 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["id", "email", "name", 'password']
         extra_kwargs = {'password': {'write_only': True}}
 
-    #Object level validation
-    def validate(self, data):
-        print("serializer validation")
-        if not data.get("email"):
-            raise serializers.ValidationError({"email": "El email es obligatorio."})
-
-
-
     def validate_email(self, value):
         # Covierte el email a LowerCase
         norm_email = value.lower()
-        print(norm_email, value)
 
         # Revisa si el email ya existe email__ixact es un filtro que busca sin tener en cuenta mayusculas y/o minusculas
         if Usuarios.objects.filter(email__iexact=norm_email).exists():

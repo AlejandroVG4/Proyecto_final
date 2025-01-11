@@ -22,7 +22,6 @@ class Dispositivo(models.Model):
         return f"Dispositivo {self.num_dispositivo} de {self.usuario.email}"
 
 class Usuarios(AbstractBaseUser):
-    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100, unique=False)
     email = models.EmailField(max_length=100, unique=True, error_messages={'unique' : 'Este correo electronico ya esta registrado'})
