@@ -84,8 +84,6 @@ class AnalyzeImageView(APIView):
         if serializer.is_valid():
             serializer.save()
             busqueda = serializer.data
-            # Marcamos string de la enfermedad como traducida
-            busqueda['enfermedad']['nombre'] = _(busqueda['enfermedad']['nombre'])
             return Response(
                 {
                     "mensaje" : "Búsqueda creada con éxito",
