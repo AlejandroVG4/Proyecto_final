@@ -11,7 +11,7 @@ from usuarios.models import Ubicacion, Usuarios
 from .serializers import BusquedaSerializer
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import LimitOffsetPagination
-from .utils.getTranslation import illness_translation
+from django.utils.translation import gettext as _
 
 
 # Create your views here.
@@ -40,7 +40,7 @@ class AnalyzeImageView(APIView):
 
         if not img_url:
             return Response(
-                {"error": "Imagen Requerida"},
+                {"error": _("Image required")},
                 status=status.HTTP_400_BAD_REQUEST
                 )
 
@@ -84,8 +84,8 @@ class AnalyzeImageView(APIView):
         if serializer.is_valid():
             serializer.save()
             busqueda = serializer.data
-            # Traduccion de la enfermedad
-            busqueda['enfermedad']['nombre'] = illness_translation(busqueda['enfermedad']['nombre'])
+            # Marcamos string de la enfermedad como traducida
+            busqueda['enfermedad']['nombre'] = _(busqueda['enfermedad']['nombre'])
             return Response(
                 {
                     "mensaje" : "Búsqueda creada con éxito",
