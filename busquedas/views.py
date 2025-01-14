@@ -1,4 +1,4 @@
-from .utils.getSasUrl import get_sas_url
+from .utils.getSasUrl import get_sas_url, extract_container_and_blob, delete_blob
 from .utils.visionAnalysis import analyze_image
 from .utils.getTreatment import get_treatment
 from rest_framework.views import APIView
@@ -43,6 +43,13 @@ class AnalyzeImageView(APIView):
                 {"error": _("Image required")},
                 status=status.HTTP_400_BAD_REQUEST
                 )
+
+        # FUNCION PRUEBA
+        # url_img_prueba = 'https://illnessstorage2.blob.core.windows.net/plantstorage/prueba.jpg'
+        # container_blob_name = extract_container_and_blob(url_img_prueba)
+        # print(container_blob_name)
+        # resultado = delete_blob(container_blob_name[0], container_blob_name[1])
+        # print(resultado)
 
         # Guardamos la url de la imagen en la base de datos
         img = Imagen.objects.create(url=img_url)
