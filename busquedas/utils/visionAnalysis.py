@@ -39,12 +39,6 @@ def analyze_image(imgUrl):
         if response.status_code == 200:
             response_data = response.json()
 
-            # Imprime el Id del projecto usado para comprobar que se usa PlantDiseaseDetector
-            # print(response_data["project"])
-            # print("numero de la iteracion", response_data["iteration"])
-            # print("nombre de la iteracion", iteration_name)
-            # print(response_data["created"])
-
             # Variable predictions almacena la lista de diccionario con la probabilidad de cada resultado
             predictions = response_data["predictions"]
 
@@ -58,8 +52,7 @@ def analyze_image(imgUrl):
                 return illness_name
             else:
                 print("Sin Resultados")
-
-            return
+                return None
         else:
             print(f"Error {response.status_code} - {response.text}")
             return None
@@ -81,25 +74,30 @@ def check_if_plant(imgUrl):
     try:
         response = requests.post(custom_model_endpoint_is_plant, headers=headers, json=data)
 
-        if response.status_code == 200:
-            response_data = response.json()
+        # Si falla la conexion con la ia
+        if response.status_code != 200:
+            return None, f"Error en la solicitud: {response.status_code}"
 
-            print(response_data)
+        response_data = response.json()
+        predictions = response_data["predictions"]
 
-            predictions = response_data["predictions"]
+        # Si la IA no arroja resultados
+        if not predictions:
+            return None, "La IA no entrego resultados"
 
-            if predictions:
-                closest_to_one = max(predictions, key= lambda x: x["probability"])
-                if closest_to_one["tagName"] == 'no_plant':
-                    parts = extract_container_and_blob(imgUrl)
-                    was_deleted = delete_blob(parts[0], parts[1])
-                    print(was_deleted)
-                    return False
-                else:
-                    return True
+        closest_to_one = max(predictions, key= lambda x: x["probability"])
+
+        #Si la imagen no es una planta
+        if closest_to_one["tagName"] == 'no_plant':
+            parts = extract_container_and_blob(imgUrl)
+            was_deleted = delete_blob(parts[0], parts[1])
+            print(was_deleted)
+            return False, "La imagen proporcionada debe ser de una planta para su análisis"
         else:
-            print("Sin resultado")
-
+            return True, "La imagen proporcionada es una planta para su análisis"
+    except requests.exceptions.ConnectionError as e:
+        print(f"Error de conexión: {e}")
+        return None, "Error de conexión"
     except Exception as e:
-        print(e)
-        return None
+        print(f"Error: {e}")
+        return None, "Se ha generado un error"

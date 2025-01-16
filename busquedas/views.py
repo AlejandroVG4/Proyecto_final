@@ -44,9 +44,12 @@ class AnalyzeImageView(APIView):
                 )
 
         # Llama la funcion para verificar si es planta
-        if check_if_plant(img_url) != True:
+        is_plant, mensaje = check_if_plant(img_url)
+        print(is_plant, mensaje)
+        if is_plant != True:
+            print(is_plant)
             return Response(
-                {"error":"La imagen proporcionada debe ser de una planta para su análisis"},
+                {"error": mensaje},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
