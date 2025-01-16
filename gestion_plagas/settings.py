@@ -119,6 +119,7 @@ DATABASES = {
 }
 
 
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -141,7 +142,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es'
 
 TIME_ZONE = 'UTC'
 
@@ -189,3 +191,13 @@ CORS_ALLOWED_ORIGINS = [
     # "http://localhost:5500",
     "http://127.0.0.1:5500",
 ]
+
+#Configuracion envio emails
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com' 
+EMAIL_PORT = 587 
+EMAIL_USE_TLS = True  
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')  
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD') 
+DEFAULT_FROM_EMAIL = env('EMAIL_HOST_USER')  
