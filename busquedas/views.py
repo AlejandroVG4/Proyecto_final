@@ -1,6 +1,5 @@
 from .utils.getSasUrl import get_sas_url
-from .utils.visionAnalysis import analyze_image
-from .utils.getTreatment import get_treatment
+from .utils.visionAnalysis import analyze_image, check_if_plant
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -11,6 +10,7 @@ from usuarios.models import Ubicacion, Usuarios
 from .serializers import BusquedaSerializer
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import LimitOffsetPagination
+from django.utils.translation import gettext as _
 
 
 # Create your views here.
@@ -39,9 +39,19 @@ class AnalyzeImageView(APIView):
 
         if not img_url:
             return Response(
-                {"error": "Imagen Requerida"},
+                {"error": _("Image required")},
                 status=status.HTTP_400_BAD_REQUEST
                 )
+
+        # Llama la funcion para verificar si es planta
+        is_plant, mensaje = check_if_plant(img_url)
+        print(is_plant, mensaje)
+        if is_plant != True:
+            print(is_plant)
+            return Response(
+                {"error": mensaje},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         # Guardamos la url de la imagen en la base de datos
         img = Imagen.objects.create(url=img_url)

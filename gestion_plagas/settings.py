@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from django.utils.translation import gettext_lazy as _
 import environ
 import os
 
@@ -70,10 +71,11 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -142,8 +144,19 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-# LANGUAGE_CODE = 'en-us'
+
+
 LANGUAGE_CODE = 'es'
+
+LANGUAGES = [
+    ('es', _('Spanish')),
+    ('en', _('English'))
+]
+
+# LOCALE_PATHS = [
+#     os.path.join(BASE_DIR, 'locale')
+# ]
+
 
 TIME_ZONE = 'UTC'
 
@@ -172,13 +185,13 @@ REST_FRAMEWORK = {
     # Configuracion para la autenticacion mediante Simple JWT
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ) 
+    )
 }
 
 SIMPLE_JWT = {
     # sets the timelife of the access token
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
-    # Sets the lifetime of the refresh token 
+    # Sets the lifetime of the refresh token
     'REFRESH_TOKEN_LIFETIME': timedelta(days=50),
     # controls whether refresh tokens that have been rotated are blacklisted
     'ROTATE_REFRESH_TOKENS': True,

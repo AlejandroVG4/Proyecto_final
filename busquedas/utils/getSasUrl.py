@@ -18,7 +18,7 @@ blob_service_client = BlobServiceClient(
     credential=account_key
     )
 
-# Funcion que genera el token 
+# Funcion que genera el token
 def get_sas_url():
 
     try:
@@ -29,14 +29,14 @@ def get_sas_url():
         print(account_name)
         sas_token = generate_container_sas(
             # La cuenta usada para generar el SAS
-            account_name=account_name, 
+            account_name=account_name,
             # El nombre del containes
             container_name=container_name,
             # Permisos
             permission=permissions,
             # Tiempo cuando el token se vuelve invalido
             expiry=expiry_time,
-            # Shared_key o access key 
+            # Shared_key o access key
             account_key=account_key
         )
 
@@ -48,4 +48,3 @@ def get_sas_url():
     except Exception as e:
         print(e)
         return ""
-

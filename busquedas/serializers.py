@@ -4,6 +4,7 @@ from enfermedades.models import Enfermedad
 from enfermedades.serializers import EnfermedadSerializer
 from usuarios.models import Usuarios, Ubicacion
 from usuarios.serializers import UbicacionSerializer
+from django.utils.translation import gettext as _
 
 
 class ImagenSerializer(ModelSerializer):
@@ -37,4 +38,8 @@ class BusquedaSerializer(ModelSerializer):
             'usuario_id'
         ]
 
-
+    # Sobreescribe el método to_representation para entregar el nombre de la enfermedad traducido solo al cliente
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['enfermedad']['nombre'] = _(ret['enfermedad']['nombre'])
+        return ret
