@@ -20,12 +20,10 @@ urlpatterns = [
     path('login/', views.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-    
     #Rutas para recuperar contraseñas
+    # URL para solicitar envio email de restablecimiento contraseña
     path(
-        'password-reset/',  # URL para solicitar el restablecimiento
-        auth_views.PasswordResetView.as_view(), 
-        name='password_reset'
+        'password-reset/',views.CustomPasswordResetView.as_view(), name='password_reset'
     ),
     path(
         'password-reset/done/',  # URL que indica que el correo fue enviado
