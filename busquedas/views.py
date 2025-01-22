@@ -17,7 +17,7 @@ from django.utils.translation import gettext as _
 
 class GenerateSasUrlView(APIView):
 
-    # TODO Restringir 
+    # TODO Restringir
     permission_classes = [AllowAny]
 
     def get(self, request):
