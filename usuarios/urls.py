@@ -8,22 +8,22 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     # Ruta para el registro de un nuevo usuario
-    path('register/', views.RegisterView.as_view(), name = "sign_up"),
+    path('registro/', views.RegisterView.as_view(), name = "sign_up"),
 
     # Ruta para obtener el perfil del usuario autenticado
-    path('profile/', views.ProfileView.as_view(), name='user_list'),
+    path('perfil/', views.ProfileView.as_view(), name='user_list'),
 
     # Ruta para obtener, actualizar o eliminar un usuario específico
-    path('users/', views.UserDetailView.as_view(), name='user_detail'),
+    path('usuario/', views.UserDetailView.as_view(), name='user_detail'),
 
     #Authentication
-    path('login/', views.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('auth/iniciar-sesion/', views.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/renovar-token/', TokenRefreshView.as_view(), name='token_refresh'),
 
     #Rutas para recuperar contraseñas
     # URL para solicitar envio email de restablecimiento contraseña
     path(
-        'password-reset/',views.CustomPasswordResetView.as_view(), name='password_reset'
+        'auth/restablecer-contrasena/',views.CustomPasswordResetView.as_view(), name='password_reset'
     ),
     path(
         'password-reset/done/',  # URL que indica que el correo fue enviado
