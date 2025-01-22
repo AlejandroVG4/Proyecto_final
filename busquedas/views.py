@@ -96,7 +96,7 @@ class AnalyzeImageView(APIView):
             return Response(
                 {
                     "mensaje" : "Búsqueda creada con éxito",
-                    "búsqueda" : busqueda
+                    "busqueda" : busqueda
                 },
                 status = status.HTTP_200_OK
             )
