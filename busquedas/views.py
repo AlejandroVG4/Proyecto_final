@@ -17,7 +17,7 @@ from django.utils.translation import gettext as _
 
 class GenerateSasUrlView(APIView):
 
-    # TODO Restringir 
+    # TODO Restringir
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -96,7 +96,7 @@ class AnalyzeImageView(APIView):
             return Response(
                 {
                     "mensaje" : "Búsqueda creada con éxito",
-                    "búsqueda" : busqueda
+                    "busqueda" : busqueda
                 },
                 status = status.HTTP_200_OK
             )

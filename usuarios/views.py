@@ -8,6 +8,15 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
+from django.contrib.auth.views import PasswordResetView
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.conf import settings
+from django.urls import reverse
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 
 # Create your views here.
@@ -70,3 +79,41 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
         print(user)
         user.delete()  # Elimina el usuario de la base de datos.
         return Response({"message": "Usuario eliminado exitosamente."}, status=status.HTTP_204_NO_CONTENT)  # Mensaje de éxito.
+
+class CustomPasswordResetView(APIView):
+
+    # Plantilla del mensaje del email
+    email_template_name = 'password_reset_email.html'
+
+    def post(self, request, *args, **kwargs):
+
+        # Extraer el email de la request
+        email = request.data.get('email')
+
+        # Verificar si email no es enviado en la solicitud
+        if not email:
+            return Response({'error' : 'Ingresa un correo electrónico'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            #Extraer el usuarion con el email indicado
+            user = Usuarios.objects.get(email=email)
+        except Usuarios.DoesNotExist:
+            return Response({'error' : 'El correo electrónico no se encuentra registrado'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Generar el token y uid que se envian en la url
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(str(user.pk).encode())
+
+        # Url de restablecimiento de contraseña (Debe ser cambiada por un deep link)
+        reset_url = request.build_absolute_uri(reverse('password_reset_confirm', kwargs={'uidb64' : uid, 'token' : token}))
+
+        # Asunto y mensaje del correo
+        subject = "Solicitud de restablecimiento de contraseña"
+        message = render_to_string(self.email_template_name, {
+            'reset_url' : reset_url,
+            'user' : user
+        })
+
+        # Funcion que envia el email al usuario
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], html_message=message)
+        return Response({'message' : 'Correo de restablecimiento enviado exitosamente'}, status=status.HTTP_200_OK)
