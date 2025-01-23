@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from django.utils.translation import gettext_lazy as _
 import environ
 import os
 
@@ -70,10 +71,11 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -85,7 +87,7 @@ ROOT_URLCONF = 'gestion_plagas.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -119,6 +121,7 @@ DATABASES = {
 }
 
 
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -141,7 +144,19 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+
+
+LANGUAGE_CODE = 'es'
+
+LANGUAGES = [
+    ('es', _('Spanish')),
+    ('en', _('English'))
+]
+
+# LOCALE_PATHS = [
+#     os.path.join(BASE_DIR, 'locale')
+# ]
+
 
 TIME_ZONE = 'UTC'
 
@@ -170,13 +185,13 @@ REST_FRAMEWORK = {
     # Configuracion para la autenticacion mediante Simple JWT
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ) 
+    )
 }
 
 SIMPLE_JWT = {
     # sets the timelife of the access token
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
-    # Sets the lifetime of the refresh token 
+    # Sets the lifetime of the refresh token
     'REFRESH_TOKEN_LIFETIME': timedelta(days=50),
     # controls whether refresh tokens that have been rotated are blacklisted
     'ROTATE_REFRESH_TOKENS': True,
@@ -189,3 +204,12 @@ CORS_ALLOWED_ORIGINS = [
     # "http://localhost:5500",
     "http://127.0.0.1:5500",
 ]
+
+#Configuracion envio emails
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = env('EMAIL_HOST_USER')
