@@ -51,7 +51,6 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     def update(self, request, *args, **kwargs):
         partial = kwargs.get('partial', False)  # Detecta si es un PATCH (parcial).
         instance = request.user # Obtiene el usuario a actualizar.
-
         # Encripta la contraseña
         if "password" in request.data:
             request.data["password"] = make_password(request.data["password"])
@@ -64,7 +63,6 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
                 error_message = f"Los campos {', '.join(invalid_fields)} no son válidos."
 
             return Response({"error": error_message}, status=status.HTTP_400_BAD_REQUEST)
-
         serializer = self.get_serializer(instance, data=request.data, partial=partial)  # Valida y serializa los datos.
         serializer.is_valid(raise_exception=True)  # Valida los datos del serializador.
         self.perform_update(serializer)  # Guarda los cambios en la base de datos.

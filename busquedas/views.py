@@ -16,9 +16,8 @@ from django.utils.translation import gettext as _
 # Create your views here.
 
 class GenerateSasUrlView(APIView):
-
     # TODO Restringir
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
 
@@ -110,7 +109,6 @@ class BusquedaPagination(LimitOffsetPagination):
 
 # Vista que devuelve la lista de busquedas por usuario
 # URL peticion con paginacion: ?limit=3
-
 class BusquedaListView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Busqueda.objects.all()
