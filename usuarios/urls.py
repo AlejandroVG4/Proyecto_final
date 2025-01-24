@@ -29,10 +29,9 @@ urlpatterns = [
         name='password_reset_done'
     ),
     path(
-        'password-reset-confirm/<uidb64>/<token>/',  # URL con el token para restablecer la contraseña
-        auth_views.PasswordResetConfirmView.as_view(),
-        name='password_reset_confirm'
-    ),
+        'password-reset-confirm/<str:uidb64>/<str:token>/', views.CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'
+         ),
+
     path(
         'password-reset-complete/',  # URL que indica que la contraseña ha sido cambiada
         auth_views.PasswordResetCompleteView.as_view(),

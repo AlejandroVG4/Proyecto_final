@@ -18,7 +18,6 @@ from django.urls import reverse
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
-
 # Create your views here.
 # Vista de Registro Usuarios
 class RegisterView(generics.CreateAPIView):
@@ -95,7 +94,7 @@ class CustomPasswordResetView(APIView):
             return Response({'error' : 'Ingresa un correo electrónico'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            #Extraer el usuarion con el email indicado
+            #Extraer el usuario con el email indicado
             user = Usuarios.objects.get(email=email)
         except Usuarios.DoesNotExist:
             return Response({'error' : 'El correo electrónico no se encuentra registrado'}, status=status.HTTP_400_BAD_REQUEST)
@@ -117,3 +116,25 @@ class CustomPasswordResetView(APIView):
         # Funcion que envia el email al usuario
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], html_message=message)
         return Response({'message' : 'Correo de restablecimiento enviado exitosamente'}, status=status.HTTP_200_OK)
+
+class CustomPasswordResetConfirmView(APIView):
+
+    def get(self, request, uidb64, token, *args, **kwargs):
+        try:
+            # Decodificar el UID
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = Usuarios.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, Usuarios.DoesNotExist):
+            return Response({'error': 'Enlace inválido o usuario no encontrado'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Verificar el token
+        if not default_token_generator.check_token(user, token):
+            return Response({'error': 'Token inválido o expirado'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Generar el deep link para la app móvil
+        # deep_link = f"myapp://password-reset/{uidb64}/{token}"
+        reset_url = request.build_absolute_uri(
+            reverse('password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})
+        )
+        # Retornar el deep link para redirigir al formulario de cambio de contraseña
+        return Response({'message': 'Token válido', 'reset_url': reset_url}, status=status.HTTP_200_OK)
