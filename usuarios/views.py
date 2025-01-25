@@ -95,18 +95,16 @@ class CustomPasswordResetView(APIView):
         if not email:
             return Response({'error' : 'Ingresa un correo electrónico'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Verificar que sea un email valido
         try:
+            # Verificar que sea un email valido
             validate_email(email)
+            # Extraer el usuario con el email indicado
+            # Verificar que el email no pertenezca a un usuario desactivado o eliminado
+            user = Usuarios.objects.get(email=email, is_deleted=False)
         except ValidationError as e:
             print("Email incorrecto, detalle", e)
-            return Response({'error' : e})
-        else:
-            print("Email Valido")
-
-        try:
-            #Extraer el usuarion con el email indicado
-            user = Usuarios.objects.get(email=email)
+            mensaje_error = e.messages[0]
+            return Response({'error' : mensaje_error}, status=status.HTTP_400_BAD_REQUEST)
         except Usuarios.DoesNotExist:
             return Response({'error' : 'El correo electrónico no se encuentra registrado'}, status=status.HTTP_400_BAD_REQUEST)
 
