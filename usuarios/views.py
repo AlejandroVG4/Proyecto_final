@@ -19,14 +19,27 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 
 
 # Vista para el registro de usuarios
 class RegisterView(generics.CreateAPIView):
+    permission_classes = [AllowAny]
     queryset = Usuarios.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [AllowAny]
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            try:
+                self.perform_create(serializer)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except IntegrityError as e:
+                if 'usuarios_email_key' in str(e):
+                    return Response({'email' : ["El correo electrónico ya está registrado."]}, status=status.HTTP_400_BAD_REQUEST)
+                raise e
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # Vista para la obtención de un token de acceso al iniciar sesión
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
@@ -95,18 +108,16 @@ class CustomPasswordResetView(APIView):
         if not email:
             return Response({'error' : 'Ingresa un correo electrónico'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Verificar que sea un email valido
         try:
+            # Verificar que sea un email valido
             validate_email(email)
+            # Extraer el usuario con el email indicado
+            # Verificar que el email no pertenezca a un usuario desactivado o eliminado
+            user = Usuarios.objects.get(email=email, is_deleted=False)
         except ValidationError as e:
             print("Email incorrecto, detalle", e)
-            return Response({'error' : e})
-        else:
-            print("Email Valido")
-
-        try:
-            #Extraer el usuarion con el email indicado
-            user = Usuarios.objects.get(email=email)
+            mensaje_error = e.messages[0]
+            return Response({'error' : mensaje_error}, status=status.HTTP_400_BAD_REQUEST)
         except Usuarios.DoesNotExist:
             return Response({'error' : 'El correo electrónico no se encuentra registrado'}, status=status.HTTP_400_BAD_REQUEST)
 
