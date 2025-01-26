@@ -37,7 +37,7 @@ class RegisterView(generics.CreateAPIView):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except IntegrityError as e:
                 if 'usuarios_email_key' in str(e):
-                    return Response({'error' : "El correo electrónico ya está registrado."}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'email' : ["El correo electrónico ya está registrado."]}, status=status.HTTP_400_BAD_REQUEST)
                 raise e
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # Vista para la obtención de un token de acceso al iniciar sesión
