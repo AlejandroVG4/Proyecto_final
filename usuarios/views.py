@@ -17,16 +17,17 @@ from django.conf import settings
 from django.urls import reverse
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 
-# Create your views here.
-# Vista de Registro Usuarios
+# Vista para el registro de usuarios
 class RegisterView(generics.CreateAPIView):
     queryset = Usuarios.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
-# Vista Para Logearse
+# Vista para la obtención de un token de acceso al iniciar sesión
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         try:
@@ -35,7 +36,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             raise AuthenticationFailed("Las credenciales proporcionadas no son correctas.")
         return response
 
-# Vista Para Perfil de usuario autenticado
+# Vista para obtener el perfil del usuario autenticado
 class ProfileView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ProfileOutputSerializer
@@ -43,6 +44,7 @@ class ProfileView(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user
 
+# Vista para actualizar o eliminar un usuario autenticado
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]  # Solo accesible para usuarios autenticados.
     queryset = Usuarios.objects.all()  # Recupera todos los usuarios.
@@ -78,6 +80,7 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
         user.delete()  # Elimina el usuario de la base de datos.
         return Response({"message": "Usuario eliminado exitosamente."}, status=status.HTTP_204_NO_CONTENT)  # Mensaje de éxito.
 
+# Vista para enviar enlace de restauración de contraseña al correo del usuario
 class CustomPasswordResetView(APIView):
 
     # Plantilla del mensaje del email
@@ -91,6 +94,15 @@ class CustomPasswordResetView(APIView):
         # Verificar si email no es enviado en la solicitud
         if not email:
             return Response({'error' : 'Ingresa un correo electrónico'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Verificar que sea un email valido
+        try:
+            validate_email(email)
+        except ValidationError as e:
+            print("Email incorrecto, detalle", e)
+            return Response({'error' : e})
+        else:
+            print("Email Valido")
 
         try:
             #Extraer el usuarion con el email indicado
