@@ -19,14 +19,27 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 
 
 # Vista para el registro de usuarios
 class RegisterView(generics.CreateAPIView):
+    permission_classes = [AllowAny]
     queryset = Usuarios.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [AllowAny]
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            try:
+                self.perform_create(serializer)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except IntegrityError as e:
+                if 'usuarios_email_key' in str(e):
+                    return Response({'error' : "El correo electrónico ya está registrado."}, status=status.HTTP_400_BAD_REQUEST)
+                raise e
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # Vista para la obtención de un token de acceso al iniciar sesión
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):

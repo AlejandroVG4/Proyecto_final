@@ -56,7 +56,6 @@ class UserManager(BaseUserManager):
 
         """
         Crea y devuelve un superusuario con permisos de administración.
-        
         :param email: El correo electrónico del superusuario.
         :param password: La contraseña del superusuario.
         :param extra_fields: Campos adicionales como nombre, etc.
@@ -71,7 +70,6 @@ class UserManager(BaseUserManager):
             raise ValueError('el atributo is_staff debe ser True')
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('el atributo is_superuser debe ser True')
-        
         return self.create_user(email, password, **extra_fields)
 
     def get_queryset(self):
@@ -80,5 +78,3 @@ class UserManager(BaseUserManager):
 
     def all_with_deleted(self):
         return super().get_queryset()
-
-    
