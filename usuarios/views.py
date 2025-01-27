@@ -139,6 +139,7 @@ class CustomPasswordResetView(APIView):
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], html_message=message)
         return Response({'message' : 'Correo de restablecimiento enviado exitosamente'}, status=status.HTTP_200_OK)
 
+# Vista para verificar validez del token y UID para restablecer la contraseña.
 class CustomPasswordResetConfirmView(APIView):
 
     def get(self, request, uidb64, token, *args, **kwargs):
@@ -161,6 +162,7 @@ class CustomPasswordResetConfirmView(APIView):
         # Retornar el deep link para redirigir al formulario de cambio de contraseña
         return Response({'message': 'Token válido', 'reset_url': reset_url}, status=status.HTTP_200_OK)
 
+# Vista para guardar nueva contraseña
 class SetNewPasswordView(APIView):
     def post(self, request, uidb64, token, *args, **kwargs):
         serializer = PasswordChangeSerializer(data=request.data)
