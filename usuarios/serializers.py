@@ -40,3 +40,12 @@ class UbicacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ubicacion
         fields = ["id", "nombre", "latitud", "longitud"]
+
+class PasswordChangeSerializer(serializers.Serializer):
+    new_password = serializers.CharField(write_only=True, min_length=8, max_length=128)
+    confirm_password = serializers.CharField(write_only=True, min_length=8, max_length=128)
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError("Las contraseñas no coinciden.")
+        return data

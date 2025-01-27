@@ -1,5 +1,5 @@
 from .models import Usuarios
-from .serializers import UserSerializer, ProfileOutputSerializer, UserUpdateSerializer
+from .serializers import UserSerializer, ProfileOutputSerializer, UserUpdateSerializer, PasswordChangeSerializer
 from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -138,3 +138,25 @@ class CustomPasswordResetConfirmView(APIView):
         )
         # Retornar el deep link para redirigir al formulario de cambio de contraseña
         return Response({'message': 'Token válido', 'reset_url': reset_url}, status=status.HTTP_200_OK)
+
+class SetNewPasswordView(APIView):
+    def post(self, request, uidb64, token, *args, **kwargs):
+        serializer = PasswordChangeSerializer(data=request.data)
+        if serializer.is_valid():
+            new_password = serializer.validated_data['new_password']
+
+            try:
+                uid = urlsafe_base64_decode(uidb64).decode()
+                user = Usuarios.objects.get(pk=uid)
+            except (TypeError, ValueError, OverflowError, Usuarios.DoesNotExist):
+                return Response({'error': 'Enlace inválido o usuario no encontrado'}, status=status.HTTP_400_BAD_REQUEST)
+
+            if not default_token_generator.check_token(user, token):
+                return Response({'error': 'Token inválido o expirado'}, status=status.HTTP_400_BAD_REQUEST)
+
+            user.set_password(new_password)
+            user.save()
+
+            return Response({'message': 'Contraseña actualizada con éxito'}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

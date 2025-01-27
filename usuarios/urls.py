@@ -31,7 +31,8 @@ urlpatterns = [
     path(
         'password-reset-confirm/<str:uidb64>/<str:token>/', views.CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'
          ),
-
+    path(
+        'new-password/<str:uidb64>/<str:token>/', views.SetNewPasswordView.as_view(), name='password_reset_complete'),
     path(
         'password-reset-complete/',  # URL que indica que la contraseña ha sido cambiada
         auth_views.PasswordResetCompleteView.as_view(),
