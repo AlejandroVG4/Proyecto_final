@@ -17,15 +17,30 @@ from django.conf import settings
 from django.urls import reverse
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 
-# Create your views here.
-# Vista de Registro Usuarios
+
+# Vista para el registro de usuarios
 class RegisterView(generics.CreateAPIView):
+    permission_classes = [AllowAny]
     queryset = Usuarios.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [AllowAny]
 
-# Vista Para Logearse
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            try:
+                self.perform_create(serializer)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except IntegrityError as e:
+                if 'usuarios_email_key' in str(e):
+                    return Response({'email' : ["El correo electrónico ya está registrado."]}, status=status.HTTP_400_BAD_REQUEST)
+                raise e
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# Vista para la obtención de un token de acceso al iniciar sesión
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         try:
@@ -34,7 +49,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             raise AuthenticationFailed("Las credenciales proporcionadas no son correctas.")
         return response
 
-# Vista Para Perfil de usuario autenticado
+# Vista para obtener el perfil del usuario autenticado
 class ProfileView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ProfileOutputSerializer
@@ -42,6 +57,7 @@ class ProfileView(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user
 
+# Vista para actualizar o eliminar un usuario autenticado
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]  # Solo accesible para usuarios autenticados.
     queryset = Usuarios.objects.all()  # Recupera todos los usuarios.
@@ -50,7 +66,6 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     def update(self, request, *args, **kwargs):
         partial = kwargs.get('partial', False)  # Detecta si es un PATCH (parcial).
         instance = request.user # Obtiene el usuario a actualizar.
-
         # Encripta la contraseña
         if "password" in request.data:
             request.data["password"] = make_password(request.data["password"])
@@ -63,7 +78,6 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
                 error_message = f"Los campos {', '.join(invalid_fields)} no son válidos."
 
             return Response({"error": error_message}, status=status.HTTP_400_BAD_REQUEST)
-
         serializer = self.get_serializer(instance, data=request.data, partial=partial)  # Valida y serializa los datos.
         serializer.is_valid(raise_exception=True)  # Valida los datos del serializador.
         self.perform_update(serializer)  # Guarda los cambios en la base de datos.
@@ -79,6 +93,7 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
         user.delete()  # Elimina el usuario de la base de datos.
         return Response({"message": "Usuario eliminado exitosamente."}, status=status.HTTP_204_NO_CONTENT)  # Mensaje de éxito.
 
+# Vista para enviar enlace de restauración de contraseña al correo del usuario
 class CustomPasswordResetView(APIView):
 
     # Plantilla del mensaje del email
@@ -94,8 +109,15 @@ class CustomPasswordResetView(APIView):
             return Response({'error' : 'Ingresa un correo electrónico'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            #Extraer el usuario con el email indicado
-            user = Usuarios.objects.get(email=email)
+            # Verificar que sea un email valido
+            validate_email(email)
+            # Extraer el usuario con el email indicado
+            # Verificar que el email no pertenezca a un usuario desactivado o eliminado
+            user = Usuarios.objects.get(email=email, is_deleted=False)
+        except ValidationError as e:
+            print("Email incorrecto, detalle", e)
+            mensaje_error = e.messages[0]
+            return Response({'error' : mensaje_error}, status=status.HTTP_400_BAD_REQUEST)
         except Usuarios.DoesNotExist:
             return Response({'error' : 'El correo electrónico no se encuentra registrado'}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -14,11 +14,9 @@ class UserSerializer(serializers.ModelSerializer):
     def validate_email(self, value):
         # Covierte el email a LowerCase
         norm_email = value.lower()
-
-        # Revisa si el email ya existe email__ixact es un filtro que busca sin tener en cuenta mayusculas y/o minusculas
-        if Usuarios.objects.filter(email__iexact=norm_email).exists():
+        # Revisa si el email ya existe email__ixact es un filtro que busca sin tener en cuenta mayusculas y/o minusculas y que no este eliminado
+        if Usuarios.objects.filter(email__iexact=norm_email, is_deleted=False).exists():
             raise ValidationError("Este correo electrónico ya está registrado.")
-
         return norm_email
 
     def create(self, validated_data):

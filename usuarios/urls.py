@@ -17,12 +17,12 @@ urlpatterns = [
     path('detalle/', views.UserDetailView.as_view(), name='user_detail'),
 
     #Authentication
-    path('token/obtener', views.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/renovar', TokenRefreshView.as_view(), name='token_refresh'),
+    path('token/obtener/', views.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/renovar/', TokenRefreshView.as_view(), name='token_refresh'),
 
     #Rutas para recuperar contraseñas
     # URL para solicitar envio email de restablecimiento contraseña
-    path('contrasena/restablecer',views.CustomPasswordResetView.as_view(), name='password_reset'),
+    path('contrasena/restablecer/',views.CustomPasswordResetView.as_view(), name='password_reset'),
     path(
         'password-reset/done/',  # URL que indica que el correo fue enviado
         auth_views.PasswordResetDoneView.as_view(),
