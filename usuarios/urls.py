@@ -28,8 +28,8 @@ urlpatterns = [
     path('contrasena/restablecer/',views.CustomPasswordResetView.as_view(), name='password_reset'),
 
     # Ruta para verificar la validez del UID y token para el restablecimiento de contraseña.
-    path('password-reset-confirm/<str:uidb64>/<str:token>/', views.CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('contrasena/restablecer/confirmar/<str:uidb64>/<str:token>/', views.CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
 
     # Ruta para guardar la nueva contraseña
-    path('new-password/<str:uidb64>/<str:token>/', views.SetNewPasswordView.as_view(), name='password_reset_complete'),
+    path('nueva-contrasena/<str:uidb64>/<str:token>/', views.SetNewPasswordView.as_view(), name='password_reset_complete'),
 ]

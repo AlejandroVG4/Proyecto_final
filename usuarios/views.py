@@ -169,6 +169,7 @@ class SetNewPasswordView(APIView):
         if serializer.is_valid():
             new_password = serializer.validated_data['new_password']
 
+            # TODO: Validar si es necesario revisar nuevamente validez de token
             try:
                 uid = urlsafe_base64_decode(uidb64).decode()
                 user = Usuarios.objects.get(pk=uid)
