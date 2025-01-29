@@ -20,7 +20,16 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.http import HttpResponsePermanentRedirect
 
+from django.http import HttpResponseRedirect, HttpResponse
+from django.shortcuts import render
+from django.http import JsonResponse
+import urllib.parse
+
+
+class CustomRedirect(HttpResponsePermanentRedirect):
+    allowed_schemes = ['eva','instagram','http', 'https']
 
 # Vista para el registro de usuarios
 class RegisterView(generics.CreateAPIView):
@@ -121,12 +130,15 @@ class CustomPasswordResetView(APIView):
         except Usuarios.DoesNotExist:
             return Response({'error' : 'El correo electrónico no se encuentra registrado'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Generar el token y uid que se envian en la url
+        # Generar el token y encripto el uid que se envian en la url
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(str(user.pk).encode())
 
         # Url de restablecimiento de contraseña (Debe ser cambiada por un deep link)
-        reset_url = request.build_absolute_uri(reverse('password_reset_confirm', kwargs={'uidb64' : uid, 'token' : token}))
+        reset_url  = request.build_absolute_uri(reverse('redirect_to_deep_link', kwargs={'uidb64': uid, 'token' : token}))
+
+        # Deep link para redirigir a la pantalla de restablecimiento de contraseña en el frontend.
+        #reset_url = f"eva://contrasena/restablecer/{uid}/{token}/"
 
         # Asunto y mensaje del correo
         subject = "Solicitud de restablecimiento de contraseña"
@@ -164,6 +176,7 @@ class CustomPasswordResetConfirmView(APIView):
 
 # Vista para guardar nueva contraseña
 class SetNewPasswordView(APIView):
+
     def post(self, request, uidb64, token, *args, **kwargs):
         serializer = PasswordChangeSerializer(data=request.data)
         if serializer.is_valid():
@@ -185,3 +198,28 @@ class SetNewPasswordView(APIView):
             return Response({'message': 'Contraseña actualizada con éxito'}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# Vista para redirigir a deepLink
+def RedirectToDeepLink(request, uidb64, token):
+    #deep_link = f'eva://contrasena/restablecer/{uidb64}/{token}'
+    deep_link = f'instagram://'
+    #fallback_url =f'https://www.eva.com/contrasena/restablecer/{uidb64}/{token}'
+    fallback_url = "https://www.instagram.com/"
+    play_store_url = "https://play.google.com/store/apps"
+
+    response_html = f"""
+    <html>
+      <head>
+        <meta http-equiv="refresh" content="0; url={deep_link}" />
+      </head>
+      <body>
+        <p>Si la app no se abre automáticamente, haz clic aquí: <a href="{fallback_url}">Abrir en Eva</a></p>
+        <p>Si no tienes la app instalada, puedes descargarla aqui <a href="{play_store_url}">aquí</a>.</p>
+      </body>
+    </html>
+    """
+
+    print(deep_link)
+    return HttpResponse(response_html)
+
+    #return CustomRedirect(deep_link)

@@ -32,4 +32,7 @@ urlpatterns = [
 
     # Ruta para guardar la nueva contraseña
     path('nueva-contrasena/<str:uidb64>/<str:token>/', views.SetNewPasswordView.as_view(), name='password_reset_complete'),
+
+    # Ruta para redirigir a vista redirije al DeepLink o pagina auxiliar
+    path('redirigir/<str:uidb64>/<str:token>/', views.RedirectToDeepLink, name='redirect_to_deep_link'),
 ]
