@@ -35,4 +35,6 @@ urlpatterns = [
 
     # Ruta para redirigir a vista redirije al DeepLink o pagina auxiliar
     path('redirigir/<str:uidb64>/<str:token>/', views.RedirectToDeepLink, name='redirect_to_deep_link'),
+
+    path("fallback/contrasena/restablecer/<str:uidb64>/<str:token>/", views.PasswordResetFallbackView, name="password_reset_fallback"),
 ]

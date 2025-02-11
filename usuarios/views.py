@@ -29,7 +29,7 @@ import urllib.parse
 
 
 class CustomRedirect(HttpResponsePermanentRedirect):
-    allowed_schemes = ['eva','instagram','http', 'https']
+    allowed_schemes = ['eva','http', 'https']
 
 # Vista para el registro de usuarios
 class RegisterView(generics.CreateAPIView):
@@ -134,11 +134,9 @@ class CustomPasswordResetView(APIView):
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(str(user.pk).encode())
 
-        # Url de restablecimiento de contraseña (Debe ser cambiada por un deep link)
+        # Url que llama a vista redirectToDeepLink
+        # Url lleva Token y uid
         reset_url  = request.build_absolute_uri(reverse('redirect_to_deep_link', kwargs={'uidb64': uid, 'token' : token}))
-
-        # Deep link para redirigir a la pantalla de restablecimiento de contraseña en el frontend.
-        #reset_url = f"eva://contrasena/restablecer/{uid}/{token}/"
 
         # Asunto y mensaje del correo
         subject = "Solicitud de restablecimiento de contraseña"
@@ -201,25 +199,37 @@ class SetNewPasswordView(APIView):
 
 # Vista para redirigir a deepLink
 def RedirectToDeepLink(request, uidb64, token):
-    #deep_link = f'eva://contrasena/restablecer/{uidb64}/{token}'
-    deep_link = f'instagram://'
-    #fallback_url =f'https://www.eva.com/contrasena/restablecer/{uidb64}/{token}'
-    fallback_url = "https://www.instagram.com/"
-    play_store_url = "https://play.google.com/store/apps"
+    deep_link = f"eva://contrasena/{uidb64}/{token}"
+    fallback_url = request.build_absolute_uri(reverse("password_reset_fallback", args=[uidb64, token]))
+
+    print("Fallback URL:", fallback_url)
 
     response_html = f"""
-    <html>
-      <head>
-        <meta http-equiv="refresh" content="0; url={deep_link}" />
-      </head>
-      <body>
-        <p>Si la app no se abre automáticamente, haz clic aquí: <a href="{fallback_url}">Abrir en Eva</a></p>
-        <p>Si no tienes la app instalada, puedes descargarla aqui <a href="{play_store_url}">aquí</a>.</p>
-      </body>
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Abrir en Eva</title>
+        <script type="text/javascript">
+            function openApp() {{
+                window.location.href = "{deep_link}";  // Intentar abrir la app
+                setTimeout(function() {{
+                    window.location.href = "{fallback_url}";  // Si falla, ir a la página de fallback
+                }}, 3000);
+            }}
+            document.addEventListener("DOMContentLoaded", openApp);
+        </script>
+    </head>
+    <body>
+        <p>Cargando...</p>
+    </body>
     </html>
     """
-
-    print(deep_link)
+    print("Fallback URL:", fallback_url)
     return HttpResponse(response_html)
 
-    #return CustomRedirect(deep_link)
+# Ofrece una opcion de restablecer contraseña en la web
+def PasswordResetFallbackView(request, uidb64, token):
+    deep_link = f"eva://contrasena/{uidb64}/{token}"
+    return render(request, "fallback.html", {"deep_link": deep_link})

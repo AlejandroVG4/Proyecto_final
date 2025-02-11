@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restablecer Contraseña</title>
+  <script>
+    function openApp() {
+      var deepLink = "{{ deep_link }}";
+      window.location.href = deepLink;
+
+      setTimeout(function() {
+        // Si la app no se abre, redirige a la Play Store
+        window.location.href = "https://play.google.com/store/apps/details?id=com.tuapp.android";
+      }, 2000);
+    }
+  </script>
+</head>
+<body>
+    <h2>¿Quieres abrir la aplicación?</h2>
+    <p>Haz clic en el botón para abrir la app:</p>
+
+    <a href="#" onclick="openApp()" id="open-app-btn" style="
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #007bff;
+    text-decoration: none;
+    border-radius: 5px;"> Abrir en Eva </a>
+    <p>El Deep Link generado es: {{ deep_link }}</p>
+
+    <p>Si no tienes la app instalada, <a href="https://play.google.com/store/apps/details?id=com.tuapp.android">descárgala aquí</a>.</p>
+</body>
+</html>
