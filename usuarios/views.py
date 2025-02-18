@@ -27,6 +27,8 @@ from django.shortcuts import render
 from django.http import JsonResponse
 import urllib.parse
 
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
+from django.contrib.auth.models import update_last_login
 
 class CustomRedirect(HttpResponsePermanentRedirect):
     allowed_schemes = ['eva','http', 'https']
@@ -68,39 +70,40 @@ class ProfileView(generics.RetrieveAPIView):
 
 # Vista para actualizar o eliminar un usuario autenticado
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticated]  # Solo accesible para usuarios autenticados.
-    queryset = Usuarios.objects.all()  # Recupera todos los usuarios.
-    serializer_class = UserUpdateSerializer  # Usa el serializador UserUpdateSerializer para PUT y PATCH.
+    permission_classes = [IsAuthenticated]
+    queryset = Usuarios.objects.all()
+    serializer_class = UserUpdateSerializer
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.get('partial', False)  # Detecta si es un PATCH (parcial).
-        instance = request.user # Obtiene el usuario a actualizar.
-        # Encripta la contraseña
-        if "password" in request.data:
-            request.data["password"] = make_password(request.data["password"])
+        partial = kwargs.get('partial', False)
+        instance = request.user  
 
-        invalid_fields = [field for field in request.data.keys() if field not in ['name', 'email', 'password']]
+        # Solo permitimos modificar 'name' y 'password'
+        invalid_fields = [field for field in request.data.keys() if field not in self.serializer_class.Meta.fields]
         if invalid_fields:
-            if len(invalid_fields) == 1:
-                error_message = f"El campo {invalid_fields[0]} no es válido."
-            else:
-                error_message = f"Los campos {', '.join(invalid_fields)} no son válidos."
+            return Response({"error": f"Los campos {', '.join(invalid_fields)} no son válidos."}, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response({"error": error_message}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)  # Valida y serializa los datos.
-        serializer.is_valid(raise_exception=True)  # Valida los datos del serializador.
-        self.perform_update(serializer)  # Guarda los cambios en la base de datos.
-        return Response(serializer.data)  # Retorna los datos actualizados.
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if "password" in request.data:
+            tokens = OutstandingToken.objects.filter(user=instance)
+            for token in tokens:
+                token.delete()  
+
+            return Response({"message": "Contraseña actualizada. Debes iniciar sesión nuevamente."}, status=status.HTTP_200_OK)
+
+        return Response(serializer.data)
 
     def perform_update(self, serializer):
-        serializer.save()  # Guarda el usuario actualizado.
+        instance = serializer.save()
+        update_last_login(None, instance)  # Actualiza la última sesión del usuario
 
-    # Llama el metodo delete del modelo
     def delete(self, request, *args, **kwargs):
-        user = request.user  # Obtiene el usuario autenticado.
-        print(user)
-        user.delete()  # Elimina el usuario de la base de datos.
-        return Response({"message": "Usuario eliminado exitosamente."}, status=status.HTTP_204_NO_CONTENT)  # Mensaje de éxito.
+        user = request.user
+        user.delete()
+        return Response({"message": "Usuario eliminado exitosamente."}, status=status.HTTP_204_NO_CONTENT)
 
 # Vista para enviar enlace de restauración de contraseña al correo del usuario
 class CustomPasswordResetView(APIView):
