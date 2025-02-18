@@ -43,3 +43,15 @@ class BusquedaSerializer(ModelSerializer):
         ret = super().to_representation(instance)
         ret['enfermedad']['nombre'] = _(ret['enfermedad']['nombre'])
         return ret
+
+class BusquedaAnalisiSerializer(ModelSerializer):
+     class Meta:
+         model = Busqueda
+         fields = [
+            'id',
+            'fecha_creacion',
+            'enfermedad_id',
+            'ubicacion_id',
+            'imagen_id',
+            'usuario_id'
+        ]

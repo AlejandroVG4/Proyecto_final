@@ -29,6 +29,8 @@ import urllib.parse
 
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from django.contrib.auth.models import update_last_login
+from busquedas.models import Busqueda
+from busquedas.serializers import BusquedaAnalisiSerializer
 
 class CustomRedirect(HttpResponsePermanentRedirect):
     allowed_schemes = ['eva','http', 'https']
@@ -236,3 +238,14 @@ def RedirectToDeepLink(request, uidb64, token):
 def PasswordResetFallbackView(request, uidb64, token):
     deep_link = f"eva://contrasena/{uidb64}/{token}"
     return render(request, "fallback.html", {"deep_link": deep_link})
+
+# Vista que genera datos de analisis estadistico
+class Estadisticas(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Busqueda.objects.all()
+    serializer_class = BusquedaAnalisiSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return Busqueda.objects.filter(usuario=user)
+    
