@@ -26,10 +26,12 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.http import JsonResponse
 import urllib.parse
+import pandas as pd
 
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from django.contrib.auth.models import update_last_login
 from busquedas.models import Busqueda
+
 
 class CustomRedirect(HttpResponsePermanentRedirect):
     allowed_schemes = ['eva','http', 'https']
@@ -244,12 +246,22 @@ class StatisticsAnalysisView(APIView):
 
     def get(self, request):
 
-        #Obtener las busquedas del usuario autenticado
+        # Obtener las busquedas del usuario autenticado
         busquedas = Busqueda.objects.filter(usuario=request.user)
-        
-        #Convertir los datos en una lista de diccionarios
+
+        # Convertir los datos en una lista de diccionarios
         data = list(busquedas.values("fecha_creacion","enfermedad","ubicacion","usuario"))
-        print(data)
+
+        # Convertir en un DataFrame
+        data_frame = pd.DataFrame(data)
+
+        # Asegurar que la fecha sea tipo datetime
+        data_frame["fecha_creacion"] = pd.to_datetime(data_frame["fecha_creacion"])
+
+        # Continuara...
+        # hallar la moda para analisis de frecuencia de enfermedades
+        
+        print(data_frame)
         return Response({"data" : data})
         
     
