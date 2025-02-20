@@ -39,5 +39,5 @@ urlpatterns = [
     path("fallback/contrasena/restablecer/<str:uidb64>/<str:token>/", views.PasswordResetFallbackView, name="password_reset_fallback"),
 
     # Generar datos de analisis estadistico
-    path("estadisticas/", views.Estadisticas.as_view(), name="estadisticas")
+    path("estadisticas/", views.StatisticsAnalysisView.as_view(), name="estadisticas")
 ]

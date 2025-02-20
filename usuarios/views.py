@@ -30,7 +30,6 @@ import urllib.parse
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from django.contrib.auth.models import update_last_login
 from busquedas.models import Busqueda
-from busquedas.serializers import BusquedaAnalisiSerializer
 
 class CustomRedirect(HttpResponsePermanentRedirect):
     allowed_schemes = ['eva','http', 'https']
@@ -240,12 +239,18 @@ def PasswordResetFallbackView(request, uidb64, token):
     return render(request, "fallback.html", {"deep_link": deep_link})
 
 # Vista que genera datos de analisis estadistico
-class Estadisticas(generics.ListCreateAPIView):
+class StatisticsAnalysisView(APIView):
     permission_classes = [IsAuthenticated]
-    queryset = Busqueda.objects.all()
-    serializer_class = BusquedaAnalisiSerializer
 
-    def get_queryset(self):
-        user = self.request.user
-        return Busqueda.objects.filter(usuario=user)
+    def get(self, request):
+
+        #Obtener las busquedas del usuario autenticado
+        busquedas = Busqueda.objects.filter(usuario=request.user)
+        
+        #Convertir los datos en una lista de diccionarios
+        data = list(busquedas.values("fecha_creacion","enfermedad","ubicacion","usuario"))
+        print(data)
+        return Response({"data" : data})
+        
+    
     
