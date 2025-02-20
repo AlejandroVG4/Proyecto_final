@@ -31,6 +31,8 @@ import pandas as pd
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from django.contrib.auth.models import update_last_login
 from busquedas.models import Busqueda
+from enfermedades.models import Enfermedad
+from .utils.utils import encontrar_moda
 
 
 class CustomRedirect(HttpResponsePermanentRedirect):
@@ -255,14 +257,22 @@ class StatisticsAnalysisView(APIView):
         # Convertir en un DataFrame
         data_frame = pd.DataFrame(data)
 
-        # Asegurar que la fecha sea tipo datetime
-        data_frame["fecha_creacion"] = pd.to_datetime(data_frame["fecha_creacion"])
+        # Enfermedad que mas se repite en un periodo de tiempo
+        # Llamar funcion que encuentra la moda (Dato que mas se repite)
+        analisis_moda = encontrar_moda(data_frame)
+        print(analisis_moda)
 
-        # Continuara...
-        # hallar la moda para analisis de frecuencia de enfermedades
+        #Extraer id enfermedad
+        enfermedad = analisis_moda[0]
+
+        # Buscar nombre de la enfermedad por indice
+        enfermedad_nombre = Enfermedad.objects.get(id=enfermedad)
         
-        print(data_frame)
-        return Response({"data" : data})
+        print(enfermedad_nombre)
+        return Response({"estadisticas" : {
+            "moda" :{"enfermedad" : enfermedad_nombre.nombre, "fecha_inicio" : analisis_moda[1], "fecha_fin" : analisis_moda[2]}
+            }
+        })
         
     
     
