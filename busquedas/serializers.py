@@ -29,6 +29,7 @@ class BusquedaSerializer(ModelSerializer):
         model = Busqueda
         fields = [
             'id',
+            'fecha_creacion',
             'enfermedad',
             'ubicacion',
             'imagen',
