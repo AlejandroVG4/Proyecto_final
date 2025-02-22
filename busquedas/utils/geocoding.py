@@ -21,6 +21,5 @@ def get_location_name(latitude, longitude ):
     # Obtiene el segundo elemento, que generalmente corresponde al barrio
     location_name = parts[1]
 
-    pprint(location_name)
     return location_name
     

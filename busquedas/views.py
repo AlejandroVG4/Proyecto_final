@@ -8,10 +8,12 @@ from .models import Busqueda, Imagen
 from enfermedades.models import Enfermedad
 from usuarios.models import Ubicacion, Usuarios
 from .serializers import BusquedaSerializer
+from usuarios.serializers import UbicacionSerializer
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import LimitOffsetPagination
 from django.utils.translation import gettext as _
 from .utils.geocoding import get_location_name
+from decimal import Decimal
 
 
 # Create your views here.
@@ -73,22 +75,39 @@ class AnalyzeImageView(APIView):
         else:
             print("detecto ubicacion")
 
-            # Extraer latitud y longitud de los datos proporcionados.
+            # Extraer latitud y longitud de los datos proporcionados.(Agregar valor defecto por si no llega alguno)
             latitud = ubicacion_data.get('latitud')
             longitud = ubicacion_data.get('longitud')
-            print(f"Lat de la request {latitud} Long de la reque: {longitud}")
+
+            latitud_normalizada = round(Decimal(str(latitud)),6)
+            longitud_normalizada = round(Decimal(str(longitud)), 6)
+
+            print(f"Lat de la request {latitud_normalizada} Long de la reque: {longitud_normalizada}")
 
             # Buscar en la base de datos si ya existe una ubicación con la misma latitud y longitud.
-            ubicacion = Ubicacion.objects.filter(latitud=latitud, longitud=longitud).first()
-            print("Ubicacion encontrada asignando", ubicacion)
+            ubicacion = Ubicacion.objects.filter(latitud=latitud_normalizada, longitud=longitud_normalizada).first()
 
             # Si la ubicación no existe en la base de datos
             if not ubicacion:
                 print("Creando en ubicacion en BD")
-                # Si no esta en la BD, primero se debe asignar un nombre basado en la latitud y longitud
-                ubicacion_nombre = get_location_name(latitud, longitud)
-                ubicacion = Ubicacion.objects.filter(nombre="Ubicación no disponible").first()
-                # Cuando se asigne el nombre se debe guardar en la bd junto con la lat y long entregada
+                # Llamar a la funcion que asigna nombre a la ubicacion por su latitud y longitud
+                ubicacion_nombre = get_location_name(latitud_normalizada, longitud_normalizada)
+
+                # Variable que contiene los datos de la nueva ubicacion a guardar en BD
+                nueva_ubicacion = {
+                    "nombre" : ubicacion_nombre,
+                    "latitud" : latitud_normalizada,
+                    "longitud" : longitud_normalizada
+                }
+
+                ubicacion_serialiazer = UbicacionSerializer(data=nueva_ubicacion)
+                if ubicacion_serialiazer.is_valid():
+                    ubicacion = ubicacion_serialiazer.save()
+                else:
+                    print("Error al guardar la nueva ubicacion en la BD")
+                    print(ubicacion_serialiazer.errors)
+                    ubicacion = Ubicacion.objects.filter(nombre="Ubicación no disponible").first()
+                
                  
         # Si falta algun dato de la busqueda
         if not(enfermedad and usuario and ubicacion):
