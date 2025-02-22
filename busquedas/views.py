@@ -11,6 +11,7 @@ from .serializers import BusquedaSerializer
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import LimitOffsetPagination
 from django.utils.translation import gettext as _
+from .utils.geocoding import get_location_name
 
 
 # Create your views here.
@@ -85,6 +86,7 @@ class AnalyzeImageView(APIView):
             if not ubicacion:
                 print("Creando en ubicacion en BD")
                 # Si no esta en la BD, primero se debe asignar un nombre basado en la latitud y longitud
+                ubicacion_nombre = get_location_name(latitud, longitud)
                 ubicacion = Ubicacion.objects.filter(nombre="Ubicación no disponible").first()
                 # Cuando se asigne el nombre se debe guardar en la bd junto con la lat y long entregada
                  
