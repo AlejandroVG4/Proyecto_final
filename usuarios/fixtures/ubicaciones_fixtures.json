@@ -7,5 +7,14 @@
             "latitud" : "0.0",
             "longitud" : "0.0"
         }
+    },
+    {
+        "model": "usuarios.ubicacion",
+        "pk" : 2,
+        "fields" : {
+            "nombre" : "Casa Yulissa",
+            "latitud" : "4.8094585391065126",
+            "longitud" : "-75.80248161534311"
+        }
     }
 ]

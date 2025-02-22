@@ -273,6 +273,3 @@ class StatisticsAnalysisView(APIView):
             "moda" :{"enfermedad" : enfermedad_nombre.nombre, "fecha_inicio" : analisis_moda[1], "fecha_fin" : analisis_moda[2]}
             }
         })
-        
-    
-    

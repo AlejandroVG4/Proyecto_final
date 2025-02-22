@@ -66,10 +66,28 @@ class AnalyzeImageView(APIView):
         # Revisar si viene ubicacion el la request
         ubicacion_data = request.data.get('ubicacion')
 
-        # Si no tiene ubicacion asigna una por defecto
+        # Si no se proporciona una ubicación en la solicitud, asigna una ubicación por defecto.
         if not ubicacion_data:
             ubicacion = Ubicacion.objects.filter(nombre="Ubicación no disponible").first()
+        else:
+            print("detecto ubicacion")
 
+            # Extraer latitud y longitud de los datos proporcionados.
+            latitud = ubicacion_data.get('latitud')
+            longitud = ubicacion_data.get('longitud')
+            print(f"Lat de la request {latitud} Long de la reque: {longitud}")
+
+            # Buscar en la base de datos si ya existe una ubicación con la misma latitud y longitud.
+            ubicacion = Ubicacion.objects.filter(latitud=latitud, longitud=longitud).first()
+            print("Ubicacion encontrada asignando", ubicacion)
+
+            # Si la ubicación no existe en la base de datos
+            if not ubicacion:
+                print("Creando en ubicacion en BD")
+                # Si no esta en la BD, primero se debe asignar un nombre basado en la latitud y longitud
+                ubicacion = Ubicacion.objects.filter(nombre="Ubicación no disponible").first()
+                # Cuando se asigne el nombre se debe guardar en la bd junto con la lat y long entregada
+                 
         # Si falta algun dato de la busqueda
         if not(enfermedad and usuario and ubicacion):
             print(illness, usuario, ubicacion)
