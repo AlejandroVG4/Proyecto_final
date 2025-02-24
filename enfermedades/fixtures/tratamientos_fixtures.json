@@ -34,5 +34,32 @@
             "enfermedad" : 2,
             "fuente": "https://www.purplant.es/blog/combatir-mildiu-plantas/#:~:text=Debemos%20infusionar%20100%20gramos%20de,afectadas%2C%20tambi%C3%A9n%20como%20tratamiento%20preventivo."
         }
+    },
+    {
+        "model": "enfermedades.tratamiento",
+        "pk": 5,
+        "fields": {
+            "descripcion": "La mayoría de las plantas no tolera el encharcamiento, y el riego excesivo es una causa común de muerte en el hogar. Es mejor regar con frecuencia en pequeñas cantidades que hacerlo en exceso ocasionalmente.",
+            "enfermedad" : 3,
+            "fuente": "https://www.ecologiaverde.com/como-cuidar-las-plantas-3655.html#anchor_1"
+        }
+    },
+    {
+        "model": "enfermedades.tratamiento",
+        "pk": 6,
+        "fields": {
+            "descripcion": "Limpia las hojas de tus plantas para prevenir plagas, excepto en especies con follaje texturizado como suculentas, cactus o begonias. Es ideal para plantas de hojas grandes como monsteras y alocasias.",
+            "enfermedad" : 3,
+            "fuente": "https://www.purplant.es/guia-cuidado-plantas/?srsltid=AfmBOorP8nMwOXxTLc7DACTIvk_UbKmbuQ7OsmIYthvvXrBFBo09IZ8V"
+        }
+    },
+    {
+        "model": "enfermedades.tratamiento",
+        "pk": 7,
+        "fields": {
+            "descripcion": "Las plantas de interior necesitan un mínimo de fuente de luz natural y siempre indirecta",
+            "enfermedad" : 3,
+            "fuente": "https://www.purplant.es/guia-cuidado-plantas/?srsltid=AfmBOorP8nMwOXxTLc7DACTIvk_UbKmbuQ7OsmIYthvvXrBFBo09IZ8V"
+        }
     }
 ]
