@@ -32,7 +32,9 @@ from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from django.contrib.auth.models import update_last_login
 from busquedas.models import Busqueda
 from enfermedades.models import Enfermedad
-from .utils.utils import encontrar_moda
+from usuarios.models import Ubicacion, Usuarios
+from .utils.utils import encontrar_moda, encontrar_moda_ubicacion
+from django.utils.translation import gettext as _
 
 
 class CustomRedirect(HttpResponsePermanentRedirect):
@@ -248,6 +250,15 @@ class StatisticsAnalysisView(APIView):
 
     def get(self, request):
 
+        usuario = request.user
+        if not usuario.busquedas.exists():
+            return Response({
+                "error" : "El usuario no tiene búsquedas registradas"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+
+        # Verificar que el usuario tenga busquedas
+
         # Obtener las busquedas del usuario autenticado
         busquedas = Busqueda.objects.filter(usuario=request.user)
 
@@ -256,23 +267,29 @@ class StatisticsAnalysisView(APIView):
 
         # Convertir en un DataFrame
         data_frame = pd.DataFrame(data)
+        #print(data_frame)
 
-        # Enfermedad que mas se repite en un periodo de tiempo
-        # Llamar funcion que encuentra la moda (Dato que mas se repite)
-        analisis_moda = encontrar_moda(data_frame)
-        print(analisis_moda)
+        # LLamar funciones de analisis
 
-        #Extraer id enfermedad
-        enfermedad = analisis_moda[0]
+        # Variable que almacena resultados de la funcion que encuentra la moda en un periodo de 30 dias
+        datos_moda_30d = encontrar_moda(data_frame)
 
-        # Buscar nombre de la enfermedad por indice
-        enfermedad_nombre = Enfermedad.objects.get(id=enfermedad)
-        
-        print(enfermedad_nombre)
-        return Response({"estadisticas" : {
-            "moda" :{"enfermedad" : enfermedad_nombre.nombre, "fecha_inicio" : analisis_moda[1], "fecha_fin" : analisis_moda[2]}
+        # Buscar nombre enfermedad en la BD y asignarla a la clave enfermedad del diccionario
+        datos_moda_30d["enfermedad"] = _((Enfermedad.objects.filter(id=datos_moda_30d["enfermedad"]).first()).nombre)
+
+        # Moda ubicaciones
+        datos_moda_ubicaciones = encontrar_moda_ubicacion(data_frame)
+
+        for item in datos_moda_ubicaciones:
+            # Buscar nombre ubicacion en la BD y asignarla a la clave ubicacion del diccionario
+            item['ubicacion'] = (Ubicacion.objects.filter(id=item['ubicacion']).first()).nombre
+            # Buscar nombre enfermedad en la BD y asignarla a la clave enfermedad del diccionario
+            item['enfermedad'] = _((Enfermedad.objects.filter(id=item['enfermedad']).first()).nombre)
+                
+
+        return Response({
+            "estadisticas" : {
+                "frecuencia_por_fecha" : datos_moda_30d,
+                "frecuencia_por_ubicacion" : datos_moda_ubicaciones
             }
         })
-        
-    
-    
