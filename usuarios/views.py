@@ -36,6 +36,7 @@ from usuarios.models import Ubicacion, Usuarios
 from .utils.utils import encontrar_moda, encontrar_moda_ubicacion
 from django.utils.translation import gettext as _
 
+from rest_framework_simplejwt.tokens import RefreshToken
 
 class CustomRedirect(HttpResponsePermanentRedirect):
     allowed_schemes = ['eva','http', 'https']
@@ -293,3 +294,17 @@ class StatisticsAnalysisView(APIView):
                 "frecuencia_por_ubicacion" : datos_moda_ubicaciones
             }
         })
+
+# El frontend debe enviar el refresh_token en el body de la petición para invalidarlo.
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data.get("refresh")
+            token = RefreshToken(refresh_token)
+            token.blacklist()  # Invalida el token de refresh
+            return Response({"message": "Logout exitoso"}, status=200)
+        except Exception as e:
+            return Response({"error": "Token inválido"}, status=400)
