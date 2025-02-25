@@ -5,6 +5,11 @@ from rest_framework_simplejwt.views import (
     # TokenObtainPairView
 )
 from django.contrib.auth import views as auth_views
+from django.urls import path
+from rest_framework.routers import DefaultRouter
+from .views import RegisterUserView, DispositivoViewSet
+
+
 
 urlpatterns = [
     # Ruta para registrar un nuevo usuario en la aplicación.
@@ -38,3 +43,4 @@ urlpatterns = [
 
     path("fallback/contrasena/restablecer/<str:uidb64>/<str:token>/", views.PasswordResetFallbackView, name="password_reset_fallback"),
 ]
+

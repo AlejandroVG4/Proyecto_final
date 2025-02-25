@@ -3,6 +3,7 @@ from rest_framework.exceptions import ValidationError
 from .models import Usuarios, Ubicacion
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.hashers import make_password
+from .models import Dispositivo
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -24,6 +25,9 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         usuario = Usuarios.objects.create_user(**validated_data)
         return usuario
+    
+
+
 
 class ProfileOutputSerializer(serializers.ModelSerializer):
     class Meta:
@@ -71,3 +75,8 @@ class PasswordChangeSerializer(serializers.Serializer):
         if data['new_password'] != data['confirm_password']:
             raise serializers.ValidationError("Las contraseñas no coinciden.")
         return data
+    
+class DispositivoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dispositivo
+        fields = '__all__'

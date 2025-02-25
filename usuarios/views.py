@@ -29,6 +29,17 @@ import urllib.parse
 
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from django.contrib.auth.models import update_last_login
+from rest_framework.decorators import api_view
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
+from .models import Dispositivo
+from rest_framework import viewsets
+from .serializers import DispositivoSerializer
+from django.contrib.auth.models import User
+from rest_framework import viewsets, mixins
+from rest_framework import serializers
+from .models import Usuarios  
+
 
 class CustomRedirect(HttpResponsePermanentRedirect):
     allowed_schemes = ['eva','http', 'https']
@@ -36,7 +47,7 @@ class CustomRedirect(HttpResponsePermanentRedirect):
 # Vista para el registro de usuarios
 class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
-    queryset = Usuarios.objects.all()
+    queryset = Usuarios.objects.all()    
     serializer_class = UserSerializer
 
     def create(self, request, *args, **kwargs):
@@ -51,14 +62,41 @@ class RegisterView(generics.CreateAPIView):
                     return Response({'email' : ["El correo electrónico ya está registrado."]}, status=status.HTTP_400_BAD_REQUEST)
                 raise e
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class RegisterUserView(generics.CreateAPIView):
+    queryset = Usuarios.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        user = Usuarios.objects.get(username=response.data['username'])
+        Dispositivo.objects.create(usuario=user, num_dispositivo=f"Disp_{user.id}")
+        return response
 # Vista para la obtención de un token de acceso al iniciar sesión
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
-        try:
-            response = super().post(request, *args, **kwargs)
-        except AuthenticationFailed:
-            raise AuthenticationFailed("Las credenciales proporcionadas no son correctas.")
-        return response
+        response = super().post(request, *args, **kwargs)
+        user = Token.objects.get(key=response.data['token']).user
+        if not Dispositivo.objects.filter(usuario=user).exists():
+            Dispositivo.objects.create(usuario=user, num_dispositivo=f"Disp_{user.id}")
+        return response    
+@api_view(['POST'])
+def login_view(request):
+    username = request.data.get("username")
+    password = request.data.get("password")
+    user = authenticate(username=username, password=password)
+
+    if user:
+        token, _ = Token.objects.get_or_create(user=user)
+        
+        # Crear dispositivo si no existe
+        if not hasattr(user, 'dispositivo'):
+            Dispositivo.objects.create(usuario=user)
+
+        return Response({"token": token.key, "message": "Login exitoso"})
+    else:
+        return Response({"error": "Credenciales inválidas"}, status=400)
 
 # Vista para obtener el perfil del usuario autenticado
 class ProfileView(generics.RetrieveAPIView):
@@ -236,3 +274,27 @@ def RedirectToDeepLink(request, uidb64, token):
 def PasswordResetFallbackView(request, uidb64, token):
     deep_link = f"eva://contrasena/{uidb64}/{token}"
     return render(request, "fallback.html", {"deep_link": deep_link})
+
+class DispositivoViewSet(viewsets.ReadOnlyModelViewSet):  # Solo lectura
+    queryset = Dispositivo.objects.all()
+    serializer_class = DispositivoSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Dispositivo.objects.filter(usuario=self.request.user)
+    
+class DispositivoViewSet(mixins.ListModelMixin, 
+                         mixins.RetrieveModelMixin, 
+                         mixins.CreateModelMixin, 
+                         viewsets.GenericViewSet):
+    queryset = Dispositivo.objects.all()
+    serializer_class = DispositivoSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Dispositivo.objects.filter(usuario=self.request.user)
+
+    def perform_create(self, serializer):
+        if Dispositivo.objects.filter(usuario=self.request.user).exists():
+            raise serializers.ValidationError("El usuario ya tiene un dispositivo.")
+        serializer.save(usuario=self.request.user)
