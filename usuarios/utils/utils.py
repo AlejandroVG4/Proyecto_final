@@ -71,7 +71,7 @@ def contar_plantas_por_salud(data_frame):
 
    # definir las fechas de inicio y fin para el conteo
    hoy = pd.Timestamp.now(tz='UTC')
-   inicio = hoy - pd.DateOffset(days=5)
+   inicio = hoy - pd.DateOffset(days=30)
 
    #filtrar los datos para tener solo el rango de fechas seleccionado
    data_filtrado = data_frame[(data_frame["fecha_creacion"] >= inicio)&(data_frame["fecha_creacion"]<= hoy)]
