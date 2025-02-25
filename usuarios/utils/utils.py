@@ -64,3 +64,25 @@ def encontrar_moda_ubicacion(data_frame):
     diccionario_resultado = enfermedad_mas_buscada.to_dict(orient="records")
 
     return diccionario_resultado
+
+def contar_plantas_por_salud(data_frame):
+   # Asegurar que la fecha sea de tipo date time
+   data_frame["fecha_creacion"] = pd.to_datetime(data_frame["fecha_creacion"])
+
+   # definir las fechas de inicio y fin para el conteo
+   hoy = pd.Timestamp.now(tz='UTC')
+   inicio = hoy - pd.DateOffset(days=5)
+
+   #filtrar los datos para tener solo el rango de fechas seleccionado
+   data_filtrado = data_frame[(data_frame["fecha_creacion"] >= inicio)&(data_frame["fecha_creacion"]<= hoy)]
+
+   # Sacar Lista de enfermedades encontradas
+   enfermedades_data = {'enfermedades' : data_filtrado["enfermedad"].tolist()}
+   
+   # Contar cuanto hay de cada enfermedad
+   conteo_enfermedades = data_filtrado["enfermedad"].value_counts()
+
+   # Convertir en un diccionario
+   resultado = conteo_enfermedades.to_dict()
+
+   return resultado

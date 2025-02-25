@@ -33,7 +33,7 @@ from django.contrib.auth.models import update_last_login
 from busquedas.models import Busqueda
 from enfermedades.models import Enfermedad
 from usuarios.models import Ubicacion, Usuarios
-from .utils.utils import encontrar_moda, encontrar_moda_ubicacion
+from .utils.utils import encontrar_moda, encontrar_moda_ubicacion, contar_plantas_por_salud
 from django.utils.translation import gettext as _
 
 
@@ -286,10 +286,19 @@ class StatisticsAnalysisView(APIView):
             # Buscar nombre enfermedad en la BD y asignarla a la clave enfermedad del diccionario
             item['enfermedad'] = _((Enfermedad.objects.filter(id=item['enfermedad']).first()).nombre)
                 
+        datos_conteo_enfermedades = contar_plantas_por_salud(data_frame)
+        conteo_registros_dict = {}
+
+        for clave in datos_conteo_enfermedades.keys():
+            clave_nombre =_((Enfermedad.objects.filter(id=clave).first()).nombre)
+            conteo_registros_dict[clave_nombre] = datos_conteo_enfermedades[clave]
+
+            
 
         return Response({
             "estadisticas" : {
                 "frecuencia_por_fecha" : datos_moda_30d,
-                "frecuencia_por_ubicacion" : datos_moda_ubicaciones
+                "frecuencia_por_ubicacion" : datos_moda_ubicaciones,
+                "conteo_enfermedades" : conteo_registros_dict
             }
         })
