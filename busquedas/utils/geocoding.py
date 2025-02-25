@@ -9,8 +9,12 @@ def get_location_name(latitude, longitude ):
     # Importa la clase OpenCageGeocode y crea una instancia con la clave de la API
     geocoder = OpenCageGeocode(key)
 
+    # TODO Si la api key esta vacia, devuelve None
+
     # convierte latitud y longitud en una dirección
     results = geocoder.reverse_geocode(latitude, longitude)
+
+    # TODO si la solicitud falla o no entrega resultados, manejar la excepción
 
     # Extrae la dirección completa en formato legible
     formatted_address = results[0].get("formatted")
