@@ -75,33 +75,14 @@ class ProfileView(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user
 
-# Vista para actualizar o eliminar un usuario autenticado
+# Vista para actualizar nombre del usuario o eliminar un usuario autenticado
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Usuarios.objects.all()
     serializer_class = UserUpdateSerializer
 
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.get('partial', False)
-        instance = request.user  
-
-        # Solo permitimos modificar 'name' y 'password'
-        invalid_fields = [field for field in request.data.keys() if field not in self.serializer_class.Meta.fields]
-        if invalid_fields:
-            return Response({"error": f"Los campos {', '.join(invalid_fields)} no son válidos."}, status=status.HTTP_400_BAD_REQUEST)
-
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        if "password" in request.data:
-            tokens = OutstandingToken.objects.filter(user=instance)
-            for token in tokens:
-                token.delete()  
-
-            return Response({"message": "Contraseña actualizada. Debes iniciar sesión nuevamente."}, status=status.HTTP_200_OK)
-
-        return Response(serializer.data)
+    def get_object(self):
+        return self.request.user
 
     def perform_update(self, serializer):
         instance = serializer.save()

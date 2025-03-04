@@ -31,32 +31,24 @@ class ProfileOutputSerializer(serializers.ModelSerializer):
         fields = ['name', 'email']
 
 class UserUpdateSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=False)
-    email = serializers.EmailField(read_only=True)  # Ahora el email es de solo lectura
-
     class Meta:
         model = Usuarios
-        fields = ['name', 'email', 'password']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ['name']
+        read_only_fields = ['email']
+        extra_kwargs = {'password': {'write_only': False}}
 
     def validate(self, data):
-        if 'email' in self.initial_data:  # Si intentan actualizar el email
-            raise serializers.ValidationError({"email": "No puedes modificar el correo electrónico."})
+
+        forbidden_fields = ['email', 'password']
+        
+        fields_in_data = [field for field in forbidden_fields if field in self.initial_data]
+        # Si intentan actualizar el email o password
+
+        if fields_in_data:
+            raise serializers.ValidationError({
+                "Error": f"No puedes modificar los siguientes campos: {', '.join(fields_in_data)}"
+            })
         return data
-
-    def validate_password(self, value):
-        if value: 
-            if len(value) < 8:
-                raise serializers.ValidationError("La contraseña debe tener al menos 8 caracteres.")
-            validate_password(value)  
-        return value
-
-    def update(self, instance, validated_data):
-        if 'password' in validated_data:
-            validated_data['password'] = make_password(validated_data['password'])  
-        return super().update(instance, validated_data)
-
-
 
 class UbicacionSerializer(serializers.ModelSerializer):
     class Meta:
