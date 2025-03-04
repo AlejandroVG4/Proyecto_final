@@ -31,32 +31,24 @@ class ProfileOutputSerializer(serializers.ModelSerializer):
         fields = ['name', 'email']
 
 class UserUpdateSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=False)
-    email = serializers.EmailField(read_only=True)  # Ahora el email es de solo lectura
-
     class Meta:
         model = Usuarios
-        fields = ['name', 'email', 'password']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ['name']
+        read_only_fields = ['email']
+        extra_kwargs = {'password': {'write_only': False}}
 
     def validate(self, data):
-        if 'email' in self.initial_data:  # Si intentan actualizar el email
-            raise serializers.ValidationError({"email": "No puedes modificar el correo electrónico."})
+
+        forbidden_fields = ['email', 'password']
+        
+        fields_in_data = [field for field in forbidden_fields if field in self.initial_data]
+        # Si intentan actualizar el email o password
+
+        if fields_in_data:
+            raise serializers.ValidationError({
+                "Error": f"No puedes modificar los siguientes campos: {', '.join(fields_in_data)}"
+            })
         return data
-
-    def validate_password(self, value):
-        if value: 
-            if len(value) < 8:
-                raise serializers.ValidationError("La contraseña debe tener al menos 8 caracteres.")
-            validate_password(value)  
-        return value
-
-    def update(self, instance, validated_data):
-        if 'password' in validated_data:
-            validated_data['password'] = make_password(validated_data['password'])  
-        return super().update(instance, validated_data)
-
-
 
 class UbicacionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -71,3 +63,26 @@ class PasswordChangeSerializer(serializers.Serializer):
         if data['new_password'] != data['confirm_password']:
             raise serializers.ValidationError("Las contraseñas no coinciden.")
         return data
+
+# Serializador para el cambio de contraseña de usuario autenticado
+class PasswordUpdateSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
+
+    def validate_new_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError(" La nueva contraseña debe tener al menos 8 caracteres")
+        return value
+
+    def validate(self, data):
+        user = self.context['request'].user
+
+        if not user.check_password(data['old_password']):
+            raise serializers.ValidationError({"old_password": "La contraseña actual no es correcta."})
+        return data
+
+    def save(self):
+        user = self.context['request'].user
+        user.set_password(self.validated_data['new_password'])
+        user.save()
+        return {"message": "Contraseña actualizada con éxito."}
