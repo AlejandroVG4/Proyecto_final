@@ -38,5 +38,8 @@ urlpatterns = [
 
     path("fallback/contrasena/restablecer/<str:uidb64>/<str:token>/", views.PasswordResetFallbackView, name="password_reset_fallback"),
 
+    # Ruta para cambiar contraseña usuario 
+    path('update-password/', views.PasswordUpdateView.as_view(), name='update_password'),
+    # Ruta para cerrar sesión
     path('logout/', views.LogoutView.as_view(), name='logout'),
 ]

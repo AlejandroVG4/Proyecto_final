@@ -1,5 +1,5 @@
 from .models import Usuarios
-from .serializers import UserSerializer, ProfileOutputSerializer, UserUpdateSerializer, PasswordChangeSerializer
+from .serializers import UserSerializer, ProfileOutputSerializer, UserUpdateSerializer, PasswordChangeSerializer, PasswordUpdateSerializer
 from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -237,3 +237,21 @@ class LogoutView(APIView):
             return Response({"message": "Logout exitoso"}, status=200)
         except Exception as e:
             return Response({"error": "Token inválido"}, status=400)
+
+class PasswordUpdateView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PasswordUpdateSerializer
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        # Procesa los datos de la solicitud
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        # Guarda la nueva contraseña y obtiene el mensaje
+        response_data = serializer.save()
+        
+        # Devuelve el mensaje de éxito
+        return Response(response_data)
