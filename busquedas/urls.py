@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import GenerateSasUrlView, BusquedaListView, BusquedaDetailView, AnalyzeImageView
+from .views import GenerateSasUrlView, BusquedaListView, BusquedaDetailView, AnalyzeImageView, StatisticsAnalysisView
 
 urlpatterns = [
     # Obtiene las busquedas del usuario logeado
@@ -9,5 +9,7 @@ urlpatterns = [
     # Analizar la imagen y crear la busqueda
     path('analisis-imagen/', AnalyzeImageView.as_view(), name='analyze_image'),
     # Obtener una búsqueda por su id
-    path('<uuid:pk>/', BusquedaDetailView.as_view(), name='busqueda-detail')
+    path('<uuid:pk>/', BusquedaDetailView.as_view(), name='busqueda-detail'),
+    # Generar datos de analisis estadistico
+    path("estadisticas/", StatisticsAnalysisView.as_view(), name="estadisticas"),
 ]

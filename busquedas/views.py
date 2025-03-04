@@ -14,6 +14,8 @@ from rest_framework.pagination import LimitOffsetPagination
 from django.utils.translation import gettext as _
 from .utils.geocoding import get_location_name
 from decimal import Decimal
+import pandas as pd
+from .utils.utils import encontrar_moda, encontrar_moda_ubicacion, contar_plantas_por_salud
 
 
 # Create your views here.
@@ -163,4 +165,81 @@ class BusquedaDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Busqueda.objects.all()
     serializer_class = BusquedaSerializer
 
+# Vista que genera datos de analisis estadistico
+class StatisticsAnalysisView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+
+        # Verificar que el usuario tenga busquedas
+        usuario = request.user
+        if not usuario.busquedas.exists():
+            return Response({
+                "error" : "El usuario no tiene búsquedas registradas"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Obtener las busquedas del usuario autenticado
+        busquedas = Busqueda.objects.filter(usuario=request.user)
+
+        # Convertir los datos en una lista de diccionarios
+        data = list(busquedas.values("fecha_creacion","enfermedad","ubicacion","usuario"))
+
+        # Convertir en un DataFrame
+        data_frame = pd.DataFrame(data)
+        #print(data_frame)
+
+        # LLamar funciones de analisis
+        # Variable que almacena resultados de la funcion que encuentra la moda en un periodo de 30 dias
+        datos_moda_30d = encontrar_moda(data_frame)
+
+        # Buscar nombre enfermedad en la BD y asignarla a la clave enfermedad del diccionario
+        datos_moda_30d["enfermedad"] = _((Enfermedad.objects.filter(id=datos_moda_30d["enfermedad"]).first()).nombre)
+
+        #Si no encuentra la enfermedad
+        if len(datos_moda_30d["enfermedad"]) <= 0:
+            return Response({
+                "error" : "Enfermedad No encontrada"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Moda ubicaciones
+        datos_moda_ubicaciones = encontrar_moda_ubicacion(data_frame)
+
+        for item in datos_moda_ubicaciones:
+            # Buscar nombre ubicacion en la BD y asignarla a la clave ubicacion del diccionario
+            item['ubicacion'] = (Ubicacion.objects.filter(id=item['ubicacion']).first()).nombre
+
+            #Si no encuentra la enfermedad
+            if len(item['ubicacion']) <= 0:
+                return Response({
+                    "error" : "Ubicacion No encontrada"
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            # Buscar nombre enfermedad en la BD y asignarla a la clave enfermedad del diccionario
+            item['enfermedad'] = _((Enfermedad.objects.filter(id=item['enfermedad']).first()).nombre)
+
+            #Si no encuentra la enfermedad
+            if len(item['enfermedad']) <= 0:
+                return Response({
+                    "error" : "Enfermedad No encontrada"
+                }, status=status.HTTP_404_NOT_FOUND)   
+
+        datos_conteo_enfermedades = contar_plantas_por_salud(data_frame)
+        conteo_registros_dict = {}
+
+        for clave in datos_conteo_enfermedades.keys():
+            clave_nombre =_((Enfermedad.objects.filter(id=clave).first()).nombre)
+
+            #Si no encuentra la enfermedad
+            conteo_registros_dict[clave_nombre] = datos_conteo_enfermedades[clave]
+            if len(item['enfermedad']) <= 0:
+                return Response({
+                    "error" : "Enfermedad No encontrada"
+                }, status=status.HTTP_404_NOT_FOUND) 
+
+        return Response({
+            "estadisticas" : {
+                "frecuencia_por_fecha" : datos_moda_30d,
+                "frecuencia_por_ubicacion" : datos_moda_ubicaciones,
+                "conteo_enfermedades" : conteo_registros_dict
+            }
+        })
