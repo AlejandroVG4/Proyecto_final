@@ -190,7 +190,7 @@ class SetNewPasswordView(APIView):
 
 # Vista para redirigir a deepLink
 def RedirectToDeepLink(request, uidb64, token):
-    deep_link = f"eva://contrasena/{uidb64}/{token}"
+    deep_link = f"eva://contrasena?uidb64={uidb64}&token={token}"
     fallback_url = request.build_absolute_uri(reverse("password_reset_fallback", args=[uidb64, token]))
 
     print("Fallback URL:", fallback_url)
@@ -222,7 +222,7 @@ def RedirectToDeepLink(request, uidb64, token):
 
 # Ofrece una opcion de restablecer contraseña en la web
 def PasswordResetFallbackView(request, uidb64, token):
-    deep_link = f"eva://contrasena/{uidb64}/{token}"
+    deep_link = f"eva://contrasena?uidb64={uidb64}&token={token}"
     return render(request, "fallback.html", {"deep_link": deep_link})
 
 # El frontend debe enviar el refresh_token en el body de la petición para invalidarlo.
