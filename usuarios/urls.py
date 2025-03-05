@@ -45,5 +45,6 @@ urlpatterns = [
     # Ruta para cambiar contraseña usuario 
     #path('update-password/', views.PasswordUpdateView.as_view(), name='update_password'),
 
+    # Ruta para verificar la contraseña actual (antigua) del usuario antes de permitir un cambio de contraseña.
     path("password/verify-old/", views.VerifyOldPasswordView.as_view(), name="verify_old_password"),
 ]
