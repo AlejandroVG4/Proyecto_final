@@ -64,25 +64,13 @@ class PasswordChangeSerializer(serializers.Serializer):
             raise serializers.ValidationError("Las contraseñas no coinciden.")
         return data
 
-# Serializador para el cambio de contraseña de usuario autenticado
-class PasswordUpdateSerializer(serializers.Serializer):
+# Serializador para la verificacion de contrasena de usuario autenticado
+class VerifyOldPasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(write_only=True)
-    new_password = serializers.CharField(write_only=True)
 
-    def validate_new_password(self, value):
-        if len(value) < 8:
-            raise serializers.ValidationError(" La nueva contraseña debe tener al menos 8 caracteres")
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+
+        if not user.check_password(value):
+            raise serializers.ValidationError("La contraseña actual no es correcta.")
         return value
-
-    def validate(self, data):
-        user = self.context['request'].user
-
-        if not user.check_password(data['old_password']):
-            raise serializers.ValidationError({"old_password": "La contraseña actual no es correcta."})
-        return data
-
-    def save(self):
-        user = self.context['request'].user
-        user.set_password(self.validated_data['new_password'])
-        user.save()
-        return {"message": "Contraseña actualizada con éxito."}

@@ -36,9 +36,14 @@ urlpatterns = [
     # Ruta para redirigir a vista redirije al DeepLink o pagina auxiliar
     path('redirigir/<str:uidb64>/<str:token>/', views.RedirectToDeepLink, name='redirect_to_deep_link'),
 
+    #Ruta de fallback para restablecimiento de contraseña.
     path("fallback/contrasena/restablecer/<str:uidb64>/<str:token>/", views.PasswordResetFallbackView, name="password_reset_fallback"),
-    # Ruta para cambiar contraseña usuario 
-    path('update-password/', views.PasswordUpdateView.as_view(), name='update_password'),
+    
     # Ruta para cerrar sesión
     path('logout/', views.LogoutView.as_view(), name='logout'),
+    
+    # Ruta para cambiar contraseña usuario 
+    #path('update-password/', views.PasswordUpdateView.as_view(), name='update_password'),
+
+    path("password/verify-old/", views.VerifyOldPasswordView.as_view(), name="verify_old_password"),
 ]

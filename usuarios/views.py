@@ -1,5 +1,5 @@
 from .models import Usuarios
-from .serializers import UserSerializer, ProfileOutputSerializer, UserUpdateSerializer, PasswordChangeSerializer, PasswordUpdateSerializer
+from .serializers import UserSerializer, ProfileOutputSerializer, UserUpdateSerializer, PasswordChangeSerializer, VerifyOldPasswordSerializer
 from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -238,20 +238,46 @@ class LogoutView(APIView):
         except Exception as e:
             return Response({"error": "Token inválido"}, status=400)
 
-class PasswordUpdateView(generics.UpdateAPIView):
+# class PasswordUpdateView(generics.UpdateAPIView):
+#     permission_classes = [IsAuthenticated]
+#     serializer_class = PasswordUpdateSerializer
+
+#     def get_object(self):
+#         return self.request.user
+
+#     def update(self, request, *args, **kwargs):
+#         # Procesa los datos de la solicitud
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+        
+#         # Guarda la nueva contraseña y obtiene el mensaje
+#         response_data = serializer.save()
+        
+#         # Devuelve el mensaje de éxito
+#         return Response(response_data)
+    
+class VerifyOldPasswordView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = PasswordUpdateSerializer
+    
+    def post(self, request):
 
-    def get_object(self):
-        return self.request.user
+       # Llamamos al serializador para validar la contrasena antigua
+       # data=request.data pasa los datos que el cliente envio en la solicitud
+       # context = {'request' : request} se envia la request como objeto para que el serializador acceda al usuario autenticado
+       serializer = VerifyOldPasswordSerializer(data=request.data, context = {'request' : request})
 
-    def update(self, request, *args, **kwargs):
-        # Procesa los datos de la solicitud
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        # Guarda la nueva contraseña y obtiene el mensaje
-        response_data = serializer.save()
-        
-        # Devuelve el mensaje de éxito
-        return Response(response_data)
+       if not serializer.is_valid():
+           return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+       
+       # Obtener el usuario autenticado
+       user = request.user
+       
+       # Generar el token y encripto el uid que se envian en la url
+       token = default_token_generator.make_token(user)
+       uid = urlsafe_base64_encode(str(user.pk).encode())
+
+       return Response(
+           {"uuid" : uid, "token" : token},
+           status=status.HTTP_200_OK
+       )
+       
