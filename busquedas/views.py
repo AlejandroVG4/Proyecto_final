@@ -13,6 +13,7 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from rest_framework.pagination import LimitOffsetPagination
 from django.utils.translation import gettext as _
 from .utils.geocoding import get_location_name
+from .utils.getUbicationIp import obtener_ubicacion
 from decimal import Decimal
 import pandas as pd
 from .utils.utils import encontrar_moda, encontrar_moda_ubicacion, contar_plantas_por_salud
@@ -38,6 +39,7 @@ class AnalyzeImageView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        print("ip", request.META.get('HTTP_X_FORWARDED_FOR'))
         # Extraer la url de la imagen de la request
         img_url = request.data.get('img_url')
 
@@ -73,7 +75,18 @@ class AnalyzeImageView(APIView):
 
         # Si no se proporciona una ubicación en la solicitud, asigna una ubicación por defecto.
         if not ubicacion_data:
-            ubicacion = Ubicacion.objects.filter(nombre="Ubicación no disponible").first()
+            nueva_ubicacion = obtener_ubicacion(request)
+            ubicacion = Ubicacion.objects.filter(latitud=nueva_ubicacion["latitud"], longitud=nueva_ubicacion["longitud"]).first()
+
+            if not ubicacion:
+                ubicacion_serialiazer = UbicacionSerializer(data=nueva_ubicacion)
+                if ubicacion_serialiazer.is_valid():
+                    ubicacion = ubicacion_serialiazer.save()
+                else:
+                    print("Error al guardar la nueva ubicacion en la BD")
+                    print(ubicacion_serialiazer.errors)
+                    ubicacion = Ubicacion.objects.filter(nombre="Ubicación no disponible").first()
+
         else:
             print("detecto ubicacion")
 

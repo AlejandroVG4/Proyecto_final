@@ -43,7 +43,8 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'eva-proyecto.onrender.com'
+    'eva-proyecto.onrender.com',
+    '127.0.0.1'
 ]
 
 # Application definition
