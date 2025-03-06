@@ -15,6 +15,8 @@ from datetime import timedelta
 from django.utils.translation import gettext_lazy as _
 import environ
 import os
+# Import dj-database-url at the beginning of the file.
+import dj_database_url
 
 env = environ.Env(
     DEBUG=(bool, False)
@@ -35,7 +37,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-cr6@1lno#o^$7deze(77(sg29k0el+qo$093*-9qz5o2d$l5$j'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -106,17 +108,10 @@ WSGI_APPLICATION = 'gestion_plagas.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': env('DB_ENGINE'),
-        'NAME': env('DB_NAME'),
-        # TODO cambiar usuario en produccion
-        'USER': env('DB_USER'),
-        # TODO cambiar contraseña y variables de entorno
-        # TODO Gestor de contraseñas bitwarden
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': env('DB_HOST'),
-        'PORT': env('DB_PORT', default='5432'),
-    }
+    'default' : dj_database_url.config(
+        default=env("DB_CONNECTION_URL"),
+        conn_max_age=600
+    )
 }
 
 
@@ -198,11 +193,7 @@ SIMPLE_JWT = {
     'UPDATE_LAST_LOGIN': False,
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "https://sub.example.com",
-    # "http://localhost:5500",
-    "http://127.0.0.1:5500",
-]
+CORS_ALLOW_ALL_ORIGINS = True
 
 #Configuracion envio emails
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
