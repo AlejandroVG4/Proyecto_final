@@ -75,7 +75,7 @@ class AnalyzeImageView(APIView):
 
         # Si no se proporciona una ubicación en la solicitud, asigna una ubicación por defecto.
         if not ubicacion_data:
-            nueva_ubicacion = obtener_ubicacion(request)
+            nueva_ubicacion = obtener_ubicacion(request) 
             ubicacion = Ubicacion.objects.filter(latitud=nueva_ubicacion["latitud"], longitud=nueva_ubicacion["longitud"]).first()
 
             if not ubicacion:
@@ -88,8 +88,6 @@ class AnalyzeImageView(APIView):
                     ubicacion = Ubicacion.objects.filter(nombre="Ubicación no disponible").first()
 
         else:
-            print("detecto ubicacion")
-
             # Extraer latitud y longitud de los datos proporcionados.(Agregar valor defecto por si no llega alguno)
             latitud = ubicacion_data.get('latitud')
             longitud = ubicacion_data.get('longitud')
