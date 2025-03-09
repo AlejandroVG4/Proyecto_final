@@ -218,7 +218,6 @@ class StatisticsAnalysisView(APIView):
         for item in datos_moda_ubicaciones:
             # Buscar nombre ubicacion en la BD y asignarla a la clave ubicacion del diccionario
             id=item['ubicacion']
-            print(id)
             item['ubicacion'] = (Ubicacion.objects.filter(id=item['ubicacion']).first()).nombre
             item['latitud'] = (Ubicacion.objects.filter(id=id).first()).latitud
             item['longitud'] = (Ubicacion.objects.filter(id=id).first()).longitud
