@@ -217,7 +217,10 @@ class StatisticsAnalysisView(APIView):
 
         for item in datos_moda_ubicaciones:
             # Buscar nombre ubicacion en la BD y asignarla a la clave ubicacion del diccionario
+            id=item['ubicacion']
             item['ubicacion'] = (Ubicacion.objects.filter(id=item['ubicacion']).first()).nombre
+            item['latitud'] = (Ubicacion.objects.filter(id=id).first()).latitud
+            item['longitud'] = (Ubicacion.objects.filter(id=id).first()).longitud
 
             #Si no encuentra la enfermedad
             if len(item['ubicacion']) <= 0:
@@ -233,7 +236,8 @@ class StatisticsAnalysisView(APIView):
                 return Response({
                     "error" : "Enfermedad No encontrada"
                 }, status=status.HTTP_404_NOT_FOUND)   
-
+            
+        # Estadistica conteo_enfermedade
         datos_conteo_enfermedades = contar_plantas_por_salud(data_frame)
         conteo_registros_dict = {}
 
